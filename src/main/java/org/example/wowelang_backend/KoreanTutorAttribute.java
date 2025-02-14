@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public class KoreanTutorAttribute {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long reputation;
