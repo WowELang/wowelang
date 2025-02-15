@@ -41,4 +41,12 @@ public class User {
     @OneToOne // Cascade vs orphanRemoval
     @JoinColumn(name = "korean_tutor_attribute_id")
     private KoreanTutorAttribute koreanTutorAttribute;
+
+    // 단방향 매핑 우선
+
+//    @OneToMany(mappedBy = "user")
+//    private List<Post> post = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "user")
+//    private List<Reply> reply = new ArrayList<>();
 }
