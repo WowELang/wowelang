@@ -38,8 +38,7 @@ public class User {
 
     private String interest;
 
-    @OneToOne // Cascade vs orphanRemoval
-    @JoinColumn(name = "korean_tutor_attribute_id")
+    @OneToOne(mappedBy = "user")
     private KoreanTutorAttribute koreanTutorAttribute;
 
     // 단방향 매핑 우선

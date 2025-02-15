@@ -19,6 +19,7 @@ public class KoreanTutorAttribute {
     @Column(name = "fix_rate")
     private Long fixRate;
 
-    @OneToOne(mappedBy = "koreanTutorAttribute") // 단방향 매핑인지, 양방향 매핑인지 생각해보기
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)// 단방향 매핑인지, 양방향 매핑인지 생각해보기
     private User user;
 }
