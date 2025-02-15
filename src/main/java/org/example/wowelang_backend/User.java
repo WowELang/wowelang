@@ -13,6 +13,7 @@ public class User {
 
     @Id // Id가 두 종류인데 각각 차이가 뭘까요?
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "login_id", nullable = false, unique = true) // DB에는 무슨 일이 벌어져요??

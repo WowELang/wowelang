@@ -12,6 +12,7 @@ public class KoreanTutorAttribute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "korean_tutor_attribute_id")
     private Long id;
 
     private Long reputation;
