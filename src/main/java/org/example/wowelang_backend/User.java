@@ -16,7 +16,7 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "login_id", nullable = true, unique = true) // DB에는 무슨 일이 벌어져요??
+    @Column(name = "login_id", nullable = false, unique = true) // DB에는 무슨 일이 벌어져요??
     private String loginId;
 
     @Column(nullable = false)
