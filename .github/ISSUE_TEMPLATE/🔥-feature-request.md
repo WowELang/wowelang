@@ -2,7 +2,7 @@
 name: "\U0001F525 Feature Request"
 about: 이 템플릿은 새로운 기능을 요청할 때 사용됩니다.
 title: "\U0001F525[Feature] "
-labels: "\U0001F6E0️Chore, \U0001F525Feat"
+labels: "\U0001F525Feat"
 assignees: ''
 
 ---
