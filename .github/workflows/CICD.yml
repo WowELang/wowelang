@@ -37,6 +37,7 @@ jobs:
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
 
   deploy:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     steps:
