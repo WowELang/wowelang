@@ -56,5 +56,5 @@ spring:
       on-profile: common
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto:
     show-sql: true
