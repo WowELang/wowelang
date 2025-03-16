@@ -44,7 +44,7 @@ public class Post extends BaseEntity {
     private Board board;
 
     @OneToMany(mappedBy = "post")
-    private List<Reply> reply = new ArrayList<>();
+    private List<Reply> reply;
 
     public Post(String title, String content, Board board, User user ) {
         this.title = title;
