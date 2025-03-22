@@ -11,6 +11,7 @@ import org.example.wowelang_backend.board.repository.PostRepository;
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class PostService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public List<PostDTO> getPostList(Long boardId) throws IllegalArgumentException {
 
         Board board = boardRepository.findById(boardId)
@@ -38,6 +40,7 @@ public class PostService {
                 .toList();
     }
 
+    @Transactional
     public Long createPost(Long boardId, PostCreateDTO postCreateDto) {
 
         Board board = boardRepository.findById(boardId)
