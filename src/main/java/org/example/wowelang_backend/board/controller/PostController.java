@@ -28,7 +28,7 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("")
+    @GetMapping("/list")
     public ApiResponse<PageResponseDTO<PostDTO>> getPostList(@RequestParam Long boardId, @PageableDefault(page = 0, size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 
         return ApiResponse.onSuccess(postService.getPostList(boardId, pageable));
