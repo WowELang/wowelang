@@ -1,6 +1,9 @@
 package org.example.wowelang_backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.wowelang_backend.common.apiPayLoad.GlobalResponseDTO;
+import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
+import org.example.wowelang_backend.common.apiPayLoad.status.SuccessStatus;
 import org.example.wowelang_backend.user.domain.ForeignTuteeAttribute;
 import org.example.wowelang_backend.user.domain.KoreanTutorAttribute;
 import org.example.wowelang_backend.user.domain.User;
@@ -11,7 +14,6 @@ import org.example.wowelang_backend.user.repository.ForeignTuteeRepository;
 import org.example.wowelang_backend.user.repository.KoreanTutorRepository;
 import org.example.wowelang_backend.user.repository.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,7 +58,7 @@ public class UserService {
                 .isEmailVerified(false)
                 .build();
         try {
-            userRepository.save(user);
+            userRepository.save(user); // 유저 타입에 따라 외국인이면 바로 가입, 재학생이면 메일인증으로 진행
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("이미 등록된 이메일 또는 아이디입니다.");
         }
@@ -141,5 +143,13 @@ public class UserService {
         } catch (IOException e) {
             throw new IllegalStateException("UnivCert clear API 호출 오류", e);
         }
+    }
+
+    //아이디 중복확인
+    public GlobalResponseDTO checkLoginId(String loginId) {
+        if (userRepository.existsByLoginId(loginId)) {
+            return ErrorStatus.LOGINID_DUPLICATE.getGlobalResponse();
+        }
+        return SuccessStatus.OK.getGlobalResponse();
     }
 }

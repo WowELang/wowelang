@@ -1,7 +1,9 @@
 package org.example.wowelang_backend.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.wowelang_backend.common.apiPayLoad.GlobalResponseDTO;
 import org.example.wowelang_backend.user.dto.ClearEmailDto;
+import org.example.wowelang_backend.user.dto.LoginIdCheckReqDto;
 import org.example.wowelang_backend.user.dto.UserSignupReqDto;
 import org.example.wowelang_backend.user.dto.VerificationDto;
 import org.example.wowelang_backend.user.service.UserService;
@@ -17,7 +19,7 @@ public class UserController {
 
     private final UserService userService;
 
-    // 1단계: 기본 정보 입력 후 임시 사용자 생성
+    // 1단계: 기본 정보 입력 후 사용자 생성
     @PostMapping
     public ResponseEntity<Long> signUp(@RequestBody UserSignupReqDto dto) {
         Long userId = userService.createTempUser(dto);
@@ -52,5 +54,13 @@ public class UserController {
         return ResponseEntity.ok("인증 상태가 초기화되었습니다.");
     }
 
+    //아이디 중복확인
+    @PostMapping("/check-login-id")
+    public ResponseEntity<GlobalResponseDTO> checkLoginId(@RequestBody LoginIdCheckReqDto dto) {
 
+        GlobalResponseDTO response = userService.checkLoginId(dto.getLoginId());
+        return ResponseEntity
+                .status(response.getHttpStatus())
+                .body(response);
+    }
 }
