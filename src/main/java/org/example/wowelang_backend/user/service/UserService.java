@@ -1,6 +1,7 @@
 package org.example.wowelang_backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
 import org.example.wowelang_backend.user.domain.ForeignTuteeAttribute;
 import org.example.wowelang_backend.user.domain.KoreanTutorAttribute;
 import org.example.wowelang_backend.user.domain.User;
@@ -35,11 +36,12 @@ public class UserService {
     public Long createTempUser(UserSignupReqDto dto) {
         //이메일, 로그인 아이디 중복체크
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("이미 등록된 이메일입니다.");
+            throw new IllegalArgumentException(ErrorStatus.DUPLICATE_EMAIL.getMessage());
         }
         if (userRepository.existsByLoginId(dto.getLoginId())) {
-            throw new IllegalArgumentException("이미 등록된 아이디입니다.");
+            throw new IllegalArgumentException(ErrorStatus.LOGINID_DUPLICATE.getMessage());
         }
+
 
         //임시 사용자 생성(isEmailVerified 기본값 false)
         User user = User.builder()
@@ -80,7 +82,7 @@ public class UserService {
     // 2단계: 재학생 튜터일 경우, 인증 진행
     public boolean sendVerificationEmail(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
         if (user.getUsertype() == Usertype.FOREIGN) {
             // 유학생은 메일 인증이 필요 없음
             return true;
@@ -92,7 +94,7 @@ public class UserService {
 
         boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
         if (!mailSent) {
-            throw new IllegalStateException("인증 메일 발송에 실패했습니다.");
+            throw new IllegalStateException(ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage());
         }
 
         return mailSent; // true 반환
@@ -104,16 +106,16 @@ public class UserService {
     */
     public boolean verifyUnivEmail(VerificationDto dto) {
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         if (user.getUsertype() != Usertype.NATIVE) {
-            throw new IllegalArgumentException("재학생 튜터만 이메일 인증이 필요합니다.");
+            throw new IllegalArgumentException(ErrorStatus.ONLY_NATIVE_EMAIL_AUTH_REQUIRED.getMessage());
         }
 
         boolean success = univcertService.verifyCode(user.getEmail(), dto.getCode());
 
         if (!success) {
-            throw new IllegalStateException("인증 코드가 일치하지 않습니다.");
+            throw new IllegalStateException(ErrorStatus.CERTIFICATION_CODE_MISMATCH.getMessage());
         }
         user.setIsEmailVerified(true);
         userRepository.save(user);
@@ -123,10 +125,10 @@ public class UserService {
     //3단계: 최종 회원가입 완료 처리
     public Long completeSignUp(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다ㅏ."));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         if ((user.getUsertype() == Usertype.NATIVE) && (!user.getIsEmailVerified())) {
-            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+            throw new IllegalStateException(ErrorStatus.EMAIL_NOT_VERIFIED.getMessage());
         }
 
         //이후 추가 로직 구현 가능 ex) 캐릭터 선택..
@@ -139,7 +141,7 @@ public class UserService {
             Map<String, Object> resp = univcertService.clear(email);
             boolean success = Boolean.TRUE.equals(resp.get("success"));
             if (!success) {
-                throw new IllegalStateException("UnivCert 초기화 실패: " + resp.get("message"));
+                throw new IllegalStateException(ErrorStatus.UNIVCERT_CLEAR_FAILED.getMessage() + ": " + resp.get("message"));
             }
         } catch (IOException e) {
             throw new IllegalStateException("UnivCert clear API 호출 오류", e);
@@ -150,7 +152,7 @@ public class UserService {
     //아이디 중복확인
     public void checkLoginId(String loginId) {
         if (userRepository.existsByLoginId(loginId)) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+            throw new IllegalArgumentException(ErrorStatus.LOGINID_DUPLICATE.getMessage());
         }
     }
 }
