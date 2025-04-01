@@ -1,9 +1,6 @@
 package org.example.wowelang_backend.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.wowelang_backend.common.apiPayLoad.GlobalResponseDTO;
-import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
-import org.example.wowelang_backend.common.apiPayLoad.status.SuccessStatus;
 import org.example.wowelang_backend.user.domain.ForeignTuteeAttribute;
 import org.example.wowelang_backend.user.domain.KoreanTutorAttribute;
 import org.example.wowelang_backend.user.domain.User;
@@ -33,7 +30,7 @@ public class UserService {
     //private final PasswordEncoder passwordEncoder;
     private final UnivcertService univcertService;
 
-    //1단계: 기본 정보 입력 후 임시 사용자 생성
+    // 1단계: 기본 정보 입력 후 임시 사용자 생성
     // 기본정보는 저장하지만 이메일 인증은 되지 않은 상태
     public Long createTempUser(UserSignupReqDto dto) {
         //이메일, 로그인 아이디 중복체크
@@ -57,23 +54,23 @@ public class UserService {
                 .usertype(dto.getUsertype())
                 .isEmailVerified(false)
                 .build();
-        try {
-            userRepository.save(user); // 유저 타입에 따라 외국인이면 바로 가입, 재학생이면 메일인증으로 진행
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("이미 등록된 이메일 또는 아이디입니다.");
-        }
+
+        userRepository.save(user); // 유저 타입에 따라 외국인이면 바로 가입, 재학생이면 메일인증으로 진행
 
         //유저타입별 추가 정보(이후 최종 가입 단계에서 사용)
-        if (dto.getUsertype() == Usertype.NATIVE) {
-            KoreanTutorAttribute tutor = new KoreanTutorAttribute();
-            tutor.setUser(user);
-            tutor.setReputation(0L);
-            tutor.setFixCount(0L);
+        if (dto.getUsertype() == Usertype.NATIVE) {//재학생
+            KoreanTutorAttribute tutor = KoreanTutorAttribute.builder()
+                    .user(user)
+                    .reputation(0L)
+                    .fixCount(0L)
+                    .build();
             koreanTutorRepository.save(tutor);
-        } else if (dto.getUsertype() == Usertype.FOREIGN) {
-            ForeignTuteeAttribute tutee = new ForeignTuteeAttribute();
-            tutee.setUser(user);
-            tutee.setCountry(dto.getCountry());
+
+        } else if (dto.getUsertype() == Usertype.FOREIGN) {//유학생
+            ForeignTuteeAttribute tutee = ForeignTuteeAttribute.builder()
+                    .user(user)
+                    .country(dto.getCountry())
+                    .build();
             foreignTuteeRepository.save(tutee);
         }
 
@@ -81,42 +78,46 @@ public class UserService {
     }
 
     // 2단계: 재학생 튜터일 경우, 인증 진행
-    public void sendVerificationEmail(Long userId) {
+    public boolean sendVerificationEmail(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다"));
         if (user.getUsertype() == Usertype.FOREIGN) {
-            //유학생은 메일인증 x
-            return;
-        } else if (user.getUsertype() == Usertype.NATIVE) {
-            boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
-            if (!mailSent) {
-                throw new IllegalStateException("이미 인증 요청이 완료되었거나 발송에 실패했습니다.");
-            }
+            // 유학생은 메일 인증이 필요 없음
+            return true;
         }
+        //재학생일 때만 진행
+        if (!Boolean.TRUE.equals(user.getIsEmailVerified())) { //인증된 적이 없는 유저면 우선적으로 메일 전송 여부를 초기화.
+            clearCertification(user.getEmail());
+        }
+
+        boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
+        if (!mailSent) {
+            throw new IllegalStateException("인증 메일 발송에 실패했습니다.");
+        }
+
+        return mailSent; // true 반환
     }
 
     /*
     2-1단계: 인증 코드 검증 및 대학 이메일 인증 업데이트
     @param dto 인증 요청 정보를 담은 DTO (userId, univEmail, univName, code)
     */
-    public ResponseEntity<String> verifyUnivEmail(VerificationDto dto) {
+    public boolean verifyUnivEmail(VerificationDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다"));
+
         if (user.getUsertype() != Usertype.NATIVE) {
-            return ResponseEntity.badRequest().body("재학생 튜터만 이메일 인증이 필요합니다");
+            throw new IllegalArgumentException("재학생 튜터만 이메일 인증이 필요합니다.");
         }
 
-        boolean success;
-        success = univcertService.verifyCode(user.getEmail(), dto.getCode());
+        boolean success = univcertService.verifyCode(user.getEmail(), dto.getCode());
 
-        if (success) {
-            //인증 성공시 인증상태 업데이트, 저장
-            user.setIsEmailVerified(true);
-            userRepository.save(user);
-            return ResponseEntity.ok("인증이 성공했습니다.");
-        }else{
-            return ResponseEntity.ok("인증이 실패했습니다.");
+        if (!success) {
+            throw new IllegalStateException("인증 코드가 일치하지 않습니다.");
         }
+        user.setIsEmailVerified(true);
+        userRepository.save(user);
+        return true;
     }
 
     //3단계: 최종 회원가입 완료 처리
@@ -133,7 +134,7 @@ public class UserService {
     }
 
     //인증된 이메일 초기화
-    public void clearCertification(String email) {
+    public String clearCertification(String email) {
         try {
             Map<String, Object> resp = univcertService.clear(email);
             boolean success = Boolean.TRUE.equals(resp.get("success"));
@@ -143,13 +144,13 @@ public class UserService {
         } catch (IOException e) {
             throw new IllegalStateException("UnivCert clear API 호출 오류", e);
         }
+        return "인증 상태가 초기화되었습니다.";
     }
 
     //아이디 중복확인
-    public GlobalResponseDTO checkLoginId(String loginId) {
+    public void checkLoginId(String loginId) {
         if (userRepository.existsByLoginId(loginId)) {
-            return ErrorStatus.LOGINID_DUPLICATE.getGlobalResponse();
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }
-        return SuccessStatus.OK.getGlobalResponse();
     }
 }

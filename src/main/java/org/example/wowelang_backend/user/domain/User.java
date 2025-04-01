@@ -48,23 +48,9 @@ public class User {
     // 재학생 튜터의 경우 이메일 인증 여부 플래그
     private Boolean isEmailVerified = false;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     private KoreanTutorAttribute koreanTutorAttribute;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     private ForeignTuteeAttribute foreignTuteeAttribute;
-
-    @PrePersist // 새로운 엔티티가 db에 처음 저장되기 전에 실행
-    public void prePersist() { //엔티티 생성 시점 기록
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate // 기존 엔티티가 db에 업데이트 되기 전 실행
-    public void preUpdate() { //마지막으로 수정된 시간 기록
-        this.updatedAt = LocalDateTime.now();
-    }
 }

@@ -1,15 +1,15 @@
 package org.example.wowelang_backend.user.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "foreign_tutee")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ForeignTuteeAttribute {
 
     @Id
