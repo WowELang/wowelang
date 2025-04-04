@@ -4,11 +4,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.wowelang_backend.User;
-import org.example.wowelang_backend.board.domain.Post;
 import org.example.wowelang_backend.common.BaseEntity;
-
-import java.time.LocalDate;
+import org.example.wowelang_backend.user.domain.User;
 
 @Getter
 @Entity

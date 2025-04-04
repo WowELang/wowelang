@@ -5,9 +5,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.wowelang_backend.User;
 import org.example.wowelang_backend.board.dto.PostCreateDTO;
 import org.example.wowelang_backend.common.BaseEntity;
+import org.example.wowelang_backend.user.domain.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
