@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.wowelang_backend.User;
+import org.example.wowelang_backend.user.domain.User;
 
 import java.time.LocalDateTime;
 
