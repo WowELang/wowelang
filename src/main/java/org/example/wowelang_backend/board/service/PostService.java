@@ -1,7 +1,6 @@
 package org.example.wowelang_backend.board.service;
 
-import org.example.wowelang_backend.User;
-import org.example.wowelang_backend.UserRepository;
+
 import org.example.wowelang_backend.board.domain.Board;
 import org.example.wowelang_backend.board.domain.Post;
 import org.example.wowelang_backend.board.dto.PageResponseDTO;
@@ -10,6 +9,8 @@ import org.example.wowelang_backend.board.dto.PostDTO;
 import org.example.wowelang_backend.board.repository.BoardRepository;
 import org.example.wowelang_backend.board.repository.PostRepository;
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
+import org.example.wowelang_backend.user.domain.User;
+import org.example.wowelang_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
