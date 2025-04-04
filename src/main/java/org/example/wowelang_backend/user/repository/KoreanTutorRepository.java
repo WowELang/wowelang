@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface KoreanTutorRepository extends JpaRepository<KoreanTutorAttribute, Long> {
-    Optional<KoreanTutorAttribute> findByUser_Id(Long userId); // User 엔티티의 pk
+    Optional<KoreanTutorAttribute> findByUserId(Long userId); // User 엔티티의 pk
 }

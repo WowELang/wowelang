@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface ForeignTuteeRepository extends JpaRepository<ForeignTuteeAttribute, Long> {
-    Optional<ForeignTuteeAttribute> findByUser_Id(Long userId); // User 엔티티의 pk
+    Optional<ForeignTuteeAttribute> findByUserId(Long userId); // User 엔티티의 pk
 }
