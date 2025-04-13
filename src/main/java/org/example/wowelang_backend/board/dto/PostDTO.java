@@ -3,12 +3,15 @@ package org.example.wowelang_backend.board.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.example.wowelang_backend.board.domain.Post;
+import org.example.wowelang_backend.board.domain.Reply;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
-@Builder
+@SuperBuilder
 public class PostDTO {
 
     private Long id;
@@ -29,5 +32,26 @@ public class PostDTO {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();
+    }
+
+    @Getter
+    @SuperBuilder
+    public static class PostDetailDTO extends PostDTO {
+
+        // TODO: ReplyDTO로 가져오기
+        private List<Reply> reply;
+
+        public static PostDetailDTO from(Post post) {
+            return PostDetailDTO.builder()
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .replyCnt(post.getReplyCnt())
+                    .views(post.getViews())
+                    .createdAt(post.getCreatedAt())
+                    .updatedAt(post.getUpdatedAt())
+                    .reply(post.getReply())
+                    .build();
+        }
     }
 }

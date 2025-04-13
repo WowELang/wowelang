@@ -71,4 +71,15 @@ public class PostService {
         postRepository.save(post);
         return post.getId();
     }
+
+    @Transactional
+    public PostDTO.PostDetailDTO getPost(Long postId) {
+
+        postRepository.upPostViews(postId);
+
+        Post afterUpdatePost = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException(POST_NOT_FOUND.getMessage()));
+
+        return PostDTO.PostDetailDTO.from(afterUpdatePost);
+    }
 }

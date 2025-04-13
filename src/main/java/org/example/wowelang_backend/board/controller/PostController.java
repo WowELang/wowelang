@@ -40,4 +40,10 @@ public class PostController {
 
         return ApiResponse.created(postService.createPost(boardId, postCreateDto));
     }
+
+    @GetMapping("/{postId}")
+    public ApiResponse<PostDTO.PostDetailDTO> getPost(@PathVariable Long postId) {
+
+        return ApiResponse.onSuccess(postService.getPost(postId));
+    }
 }

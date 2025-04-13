@@ -30,7 +30,8 @@ public class Reply extends BaseEntity {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+//    TODO: fetchType Lazy로 바꾸기?
+//    @ManyToOne
+//    @JoinColumn(name = "user_id")
+//    private User user;
 }

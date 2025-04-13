@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.example.wowelang_backend.board.dto.PostCreateDTO;
 import org.example.wowelang_backend.common.BaseEntity;
 import org.example.wowelang_backend.user.domain.User;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Getter
 @Entity
+@DynamicUpdate
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseEntity {
 
