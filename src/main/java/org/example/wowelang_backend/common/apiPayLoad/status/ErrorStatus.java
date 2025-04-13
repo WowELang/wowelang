@@ -18,6 +18,8 @@ public enum ErrorStatus implements BaseCode {
     // 게시글 관련 에러
     POST_NOT_CREATED(HttpStatus.BAD_REQUEST, "제목과 내용을 입력해주세요"),
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
+    POST_NO_CONTENT(HttpStatus.NO_CONTENT, "게시글이 존재하지 않습니다."),
+    POST_NO_MORE(HttpStatus.NOT_FOUND, "게시글 페이지네이션의 끝입니다."),
 
     //게시판 관련 에러
     BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시판을 찾을 수 없습니다."),
