@@ -20,7 +20,7 @@ public class UnivcertService {
         try{
             //api 호출
             String univName = "홍익대학교"; //앱 구성상 대학교 정보 받는 곳이 없으므로 홍대로 고정, 추후 수정 가능
-            boolean univCheck = true; //true -> 재학여부 확인
+            boolean univCheck = false; //true -> 재학여부 확인
             Map<String, Object> response = UnivCert.certify(apiKey, email, univName, univCheck);
             System.out.println("[UnivCert] sendCertifyMail response = " + response);
             return parseSuccess(response);
@@ -61,5 +61,17 @@ public class UnivcertService {
     // 특정 이메일의 인증 상태 초기화
     public Map<String, Object> clear(String email) throws IOException {
         return UnivCert.clear(apiKey, email);
+    }
+
+    // 현재 이메일 인증 상태 확인 (예: status API 호출)
+    public boolean hasCertificationRequest(String email) {
+        try {
+            Map<String, Object> resp = UnivCert.status(apiKey, email);
+            // UnivCert.status(...)가 { "success":true, ... } 등을 반환한다고 가정
+            return parseSuccess(resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

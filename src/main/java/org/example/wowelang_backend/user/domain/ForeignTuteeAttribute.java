@@ -6,7 +6,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "foreign_tutee")
+@Table
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

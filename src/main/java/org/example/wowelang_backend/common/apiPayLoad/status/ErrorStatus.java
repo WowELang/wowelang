@@ -37,7 +37,6 @@ public enum ErrorStatus implements BaseCode {
     UNIVCERT_CLEAR_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UnivCert 초기화 실패");
 
 
-
     private final HttpStatus httpStatus;
     private final String message;
 

@@ -87,17 +87,26 @@ public class UserService {
             // 유학생은 메일 인증이 필요 없음
             return true;
         }
-        //재학생일 때만 진행
-        if (!Boolean.TRUE.equals(user.getIsEmailVerified())) { //인증된 적이 없는 유저면 우선적으로 메일 전송 여부를 초기화.
-            clearCertification(user.getEmail());
+        // 재학생(NATIVE)이면서 이메일 인증이 아직 완료되지 않은 경우만 진행
+        if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
+            // 기존 인증 요청 이력이 있는지 UnivcertService 통해 확인
+            boolean existingRequest = univcertService.hasCertificationRequest(user.getEmail());
+            if (existingRequest) {
+                // 이미 인증 요청이 존재할 때만 초기화
+                clearCertification(user.getEmail());
+            }
+
+            // 이후 새로 인증 메일 발송
+            boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
+            if (!mailSent) {
+                throw new IllegalStateException(ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage());
+            }
+            return mailSent;
         }
 
-        boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
-        if (!mailSent) {
-            throw new IllegalStateException(ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage());
-        }
-
-        return mailSent; // true 반환
+        // 이미 이메일 인증이 완료된 사용자라면
+        // 필요 시 "이미 인증 완료" 로직 처리 (return false or exception 등)
+        return false;
     }
 
     /*

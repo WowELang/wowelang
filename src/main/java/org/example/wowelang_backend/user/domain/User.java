@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Entity
-@Table(name = "users")
+@Table
 @AllArgsConstructor //빌더 어노테이션 사용시 필요
 @Getter
 @Setter
