@@ -61,7 +61,8 @@ public class Post extends BaseEntity {
         this.reply = new ArrayList<>();
     }
 
-    public static Post create(PostCreateDTO postCreateDto, User user, Board board) {
+    // 게시글 생성하는 정적 팩토리 메서드
+    public static Post createPost(PostCreateDTO postCreateDto, User user, Board board) {
         return Post.builder()
                 .title(postCreateDto.getTitle())
                 .content(postCreateDto.getContent())
@@ -69,4 +70,12 @@ public class Post extends BaseEntity {
                 .board(board)
                 .build();
     }
+
+    // 게시글 수정하는 메서드
+    public void updatePost(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+
 }
