@@ -12,12 +12,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post,Long> {
-    Slice<Post> findAllByBoard(Board board, Pageable pageable);
+    Slice<Post> findAllByBoardAndIsDeleteFalse(Board board, Pageable pageable);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Post p SET p.views = p.views + 1 WHERE p.id = :id")
     void upPostViews(@Param("id") Long postId);
+
+    Optional<Post> findByIdAndIsDeleteFalse(Long postId);
 }

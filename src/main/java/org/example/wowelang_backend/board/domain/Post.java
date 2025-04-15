@@ -77,5 +77,9 @@ public class Post extends BaseEntity {
         this.content = content;
     }
 
+    // 게시글 삭제 로직
+    public void softDeletePost() {
+        this.isDelete = true;
+    }
 
 }

@@ -36,7 +36,7 @@ public class PostService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new IllegalArgumentException(BOARD_NOT_FOUND.getMessage()));
 
-        Slice<Post> slice = postRepository.findAllByBoard(board, pageable);
+        Slice<Post> slice = postRepository.findAllByBoardAndIsDeleteFalse(board, pageable);
 
         // TODO: 커스텀 예외처리 필요합니다.
         if(slice.getContent().isEmpty() && pageable.getPageNumber()==0) {
@@ -69,7 +69,7 @@ public class PostService {
 
         postRepository.upPostViews(postId);
 
-        Post afterUpdatePost = postRepository.findById(postId)
+        Post afterUpdatePost = postRepository.findByIdAndIsDeleteFalse(postId)
                 .orElseThrow(() -> new IllegalArgumentException(POST_NOT_FOUND.getMessage()));
 
         return PostResponseDTO.PostDetailDTO.from(afterUpdatePost);
@@ -84,5 +84,13 @@ public class PostService {
         post.updatePost(postUpdateDto.getTitle(), postUpdateDto.getContent());
 
         return PostUpdateResponseDTO.from(post);
+    }
+
+    @Transactional
+    public void deletePost(Long postId) {
+        Post post = postRepository.findByIdAndIsDeleteFalse(postId)
+                .orElseThrow(() -> new IllegalArgumentException(POST_NOT_FOUND.getMessage()));
+
+        post.softDeletePost();
     }
 }
