@@ -34,6 +34,5 @@ public class Reply extends BaseEntity {
 //    @ManyToOne
 //    @JoinColumn(name = "user_id")
 //    private User user;
-  }
 }
 
