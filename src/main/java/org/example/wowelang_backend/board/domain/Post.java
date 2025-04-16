@@ -70,7 +70,6 @@ public class Post extends BaseEntity {
                 .board(board)
                 .build();
     }
-
     // 게시글 수정하는 메서드
     public void updatePost(String title, String content) {
         this.title = title;
@@ -81,5 +80,4 @@ public class Post extends BaseEntity {
     public void softDeletePost() {
         this.isDelete = true;
     }
-
 }
