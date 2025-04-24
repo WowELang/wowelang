@@ -1,4 +1,4 @@
-package org.example.wowelang_backend.common.configs;
+package org.example.wowelang_backend.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
