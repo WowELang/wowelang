@@ -3,6 +3,7 @@ package org.example.wowelang_backend.board.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 import org.example.wowelang_backend.board.domain.Image;
 import org.example.wowelang_backend.board.dto.PostImageResponseDTO;
@@ -19,21 +20,14 @@ import java.io.InputStream;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FileService {
 
-    @Autowired
     private final AmazonS3 amazonS3;
-
-    @Autowired
     private final ImageRepository imageRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
-    public FileService(AmazonS3 amazonS3, ImageRepository imageRepository) {
-        this.amazonS3 = amazonS3;
-        this.imageRepository = imageRepository;
-    }
 
     @Transactional
     public PostImageResponseDTO uploadCompressedImage(InputStream inputStream, String filename, String contentType) throws IOException {
