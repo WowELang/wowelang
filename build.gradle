@@ -41,6 +41,11 @@ dependencies {
     /*implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.security:spring-security-test")*/
 
+    // aws S3 의존성
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    // 파일 압축 의존성
+    implementation 'net.coobird:thumbnailator:0.4.19'
 }
 
 tasks.named('test') {
