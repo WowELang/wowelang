@@ -41,23 +41,14 @@ public class UserController {
         return ApiResponse.onSuccess("알 수 없는 상태");
     }
 
-    // 2-1단계: 인증 코드 검증
-    @PatchMapping("/{userId}/email-verification")
-    public ApiResponse<String> verifyEmail(@PathVariable Long userId,
-                                           @RequestBody VerificationDto dto) {
-        dto.setUserId(userId);
-        boolean verified = userService.verifyUnivEmail(dto);
-        if (verified) {
-            return ApiResponse.onSuccess("인증이 성공했습니다.");
-        }
-        // 실패시 서비스에서 예외를 던지므로, 여기서 별도 처리할 필요 없음.
-        return ApiResponse.onSuccess("알 수 없는 상태");
-    }
-
-    // 3단계: 최종 회원가입 완료
-    @PatchMapping("/{userId}/complete-registration")
-    public ApiResponse<Long> completeSignUp(@PathVariable Long userId) {
-        Long finalUserId = userService.completeSignUp(userId);
+    // 3단계: 인증 코드 검증 및 가입 완료
+    @PatchMapping("/{userId}/complete")
+    public ApiResponse<Long> verifyAndComplete(
+            @PathVariable Long userId,
+            @RequestBody Map<String, Integer> body
+    ) {
+        int code = body.get("code");
+        Long finalUserId = userService.verifyAndCompleteSignUp(userId, code);
         return ApiResponse.onSuccess(finalUserId);
     }
 
