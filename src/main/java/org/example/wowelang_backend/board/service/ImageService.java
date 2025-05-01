@@ -8,7 +8,6 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.example.wowelang_backend.board.domain.Image;
 import org.example.wowelang_backend.board.dto.PostImageResponseDTO;
 import org.example.wowelang_backend.board.repository.ImageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +16,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class FileService {
+public class ImageService {
 
     private final AmazonS3 amazonS3;
     private final ImageRepository imageRepository;
@@ -45,7 +45,9 @@ public class FileService {
 
             String extension = ".jpg";
             String uuid = UUID.randomUUID().toString();
-            String key = "post-images/" + uuid + "_" + filename + extension;
+
+            // 파일 임시 업로드
+            String key = "tmp/" + uuid + "_" + filename + extension;
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(contentType);
@@ -69,5 +71,10 @@ public class FileService {
         } catch (Exception e) {
             throw new RuntimeException("이미지 업로드 중 에러 발생");
         }
+    }
+
+    @Transactional
+    public void markImageAsPosted(List<String> imageKeyList) {
+        imageRepository.updatePostedTrueByKeys(imageKeyList);
     }
 }
