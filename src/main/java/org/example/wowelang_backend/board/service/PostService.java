@@ -1,6 +1,7 @@
 package org.example.wowelang_backend.board.service;
 
 
+import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.board.domain.Board;
 import org.example.wowelang_backend.board.domain.Post;
 import org.example.wowelang_backend.board.dto.*;
@@ -17,18 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus.*;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
-    @Autowired
+    private final ImageService imageService;
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
-
-    public PostService(PostRepository postRepository, BoardRepository boardRepository, UserRepository userRepository) {
-        this.postRepository = postRepository;
-        this.boardRepository = boardRepository;
-        this.userRepository = userRepository;
-    }
 
     @Transactional
     public PageResponseDTO<PostResponseDTO> getPostList(Long boardId, Pageable pageable) throws Exception {
@@ -61,6 +57,12 @@ public class PostService {
         Post post = Post.createPost(postCreateDto, user, board);
 
         postRepository.save(post);
+
+        // 이미지 확정 업로드 처리
+        if(postCreateDto.getImageKeyList() != null && !postCreateDto.getImageKeyList().isEmpty()) {
+            imageService.markImageAsPosted(postCreateDto.getImageKeyList());
+        }
+
         return post.getId();
     }
 

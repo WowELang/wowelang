@@ -13,7 +13,7 @@ public class Image extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "file_id")
+    @Column(name = "image_id")
     private Long id;
 
     @Column(name = "image_key", unique = true)
