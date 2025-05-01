@@ -81,57 +81,51 @@ public class UserService {
 
     // 2단계: 재학생 튜터일 경우, 인증 진행
     public boolean sendVerificationEmail(Long userId) {
+        // 1) 사용자 확인
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        ErrorStatus.USER_NOT_FOUND.getMessage()
+                ));
+
+        // 2) 유학생(Foreign)은 인증 메일 발송 없이 바로 true 반환
         if (user.getUsertype() == Usertype.FOREIGN) {
-            // 유학생은 메일 인증이 필요 없음
             return true;
         }
-        //재학생일 때만 진행
-        if (!Boolean.TRUE.equals(user.getIsEmailVerified())) { //인증된 적이 없는 유저면 우선적으로 메일 전송 여부를 초기화.
-            clearCertification(user.getEmail());
+
+        // 3) 재학생(Native)이고 아직 인증되지 않은 경우에만 처리
+        if (!user.getIsEmailVerified()) {
+            if (univcertService.hasCertificationRequest(user.getEmail())) {
+                clearCertification(user.getEmail());
+            }
+            //새 인증 메일 발송
+            boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
+            if (!mailSent) {
+                throw new IllegalStateException(
+                        ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage()
+                );
+            }
+            return true;
         }
 
-        boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
-        if (!mailSent) {
-            throw new IllegalStateException(ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage());
-        }
-
-        return mailSent; // true 반환
+        // 4) 이미 인증이 완료된 경우에는 별도 발송 없이 false 반환 (또는 예외 처리)
+        return false;
     }
 
-    /*
-    2-1단계: 인증 코드 검증 및 대학 이메일 인증 업데이트
-    @param dto 인증 요청 정보를 담은 DTO (userId, univEmail, univName, code)
-    */
-    public boolean verifyUnivEmail(VerificationDto dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
-        if (user.getUsertype() != Usertype.NATIVE) {
-            throw new IllegalArgumentException(ErrorStatus.ONLY_NATIVE_EMAIL_AUTH_REQUIRED.getMessage());
-        }
-
-        boolean success = univcertService.verifyCode(user.getEmail(), dto.getCode());
-
-        if (!success) {
-            throw new IllegalStateException(ErrorStatus.CERTIFICATION_CODE_MISMATCH.getMessage());
-        }
-        user.setIsEmailVerified(true);
-        userRepository.save(user);
-        return true;
-    }
-
-    //3단계: 최종 회원가입 완료 처리
-    public Long completeSignUp(Long userId) {
+    //3단계: 인증코드 검증 및 가입 완료
+    public Long verifyAndCompleteSignUp(Long userId, int code) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
-        if ((user.getUsertype() == Usertype.NATIVE) && (!user.getIsEmailVerified())) {
-            throw new IllegalStateException(ErrorStatus.EMAIL_NOT_VERIFIED.getMessage());
+        if (user.getUsertype() == Usertype.NATIVE) {
+            boolean ok = univcertService.verifyCode(user.getEmail(), code);
+            if (!ok) {
+                throw new IllegalArgumentException(ErrorStatus.CERTIFICATION_CODE_MISMATCH.getMessage());
+            }
+            user.setIsEmailVerified(true);
+            userRepository.save(user);
         }
 
-        //이후 추가 로직 구현 가능 ex) 캐릭터 선택..
+        // FOREIGN 은 바로 통과
         return user.getId();
     }
 
