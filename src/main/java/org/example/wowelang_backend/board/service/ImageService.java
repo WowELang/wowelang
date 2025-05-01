@@ -80,7 +80,7 @@ public class ImageService {
 
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 18 * * *")
     @Transactional
     public void deleteUnnecessaryImage() {
         List<Image> unusedImages = imageRepository.findByIsPostedFalse();
