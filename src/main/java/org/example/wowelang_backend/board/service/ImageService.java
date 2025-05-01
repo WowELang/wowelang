@@ -9,6 +9,7 @@ import org.example.wowelang_backend.board.domain.Image;
 import org.example.wowelang_backend.board.dto.PostImageResponseDTO;
 import org.example.wowelang_backend.board.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,5 +77,23 @@ public class ImageService {
     @Transactional
     public void markImageAsPosted(List<String> imageKeyList) {
         imageRepository.updatePostedTrueByKeys(imageKeyList);
+
+    }
+
+    @Scheduled(fixedRate = 10000)
+    @Transactional
+    public void deleteUnnecessaryImage() {
+        List<Image> unusedImages = imageRepository.findByIsPostedFalse();
+
+        if(!unusedImages.isEmpty()) {
+            for( Image image : unusedImages) {
+                try {
+                    amazonS3.deleteObject(bucket, image.getImageKey());
+                } catch (Exception e) {
+                    System.out.println("S3 삭제 실패: " + image.getImageKey());
+                }
+                imageRepository.delete(image);
+            }
+        }
     }
 }

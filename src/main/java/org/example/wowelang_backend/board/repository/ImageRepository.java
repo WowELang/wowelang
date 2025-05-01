@@ -16,4 +16,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("UPDATE Image i SET i.isPosted = true WHERE i.imageKey IN :keys")
     void updatePostedTrueByKeys(@Param("keys") List<String> keys);
 
+    List<Image> findByIsPostedFalse();
+
 }
