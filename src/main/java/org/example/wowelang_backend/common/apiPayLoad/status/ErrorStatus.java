@@ -32,6 +32,7 @@ public enum ErrorStatus implements BaseCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
 
     // 인증 관련 에러
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
     ONLY_NATIVE_EMAIL_AUTH_REQUIRED(HttpStatus.BAD_REQUEST, "재학생 튜터만 이메일 인증이 필요합니다."),
     CERTIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않거나 만료되었습니다."),
     CERTIFICATION_MAIL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일 발송에 실패했습니다."),
