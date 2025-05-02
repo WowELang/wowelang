@@ -63,12 +63,11 @@ public class UnivcertService {
         return UnivCert.clear(apiKey, email);
     }
 
-    // 현재 이메일 인증 상태 확인 (예: status API 호출)
+    //해당 이메일로 이전에 인증 요청이 있었는지 확인
     public boolean hasCertificationRequest(String email) {
         try {
-            Map<String, Object> resp = UnivCert.status(apiKey, email);
-            // UnivCert.status(...)가 { "success":true, ... } 등을 반환한다고 가정
-            return parseSuccess(resp);
+            Map<String,Object> resp = UnivCert.status(apiKey, email);
+            return parseSuccess(resp);  // resp.get("success") 가 true 면 요청 이력 있음
         } catch (Exception e) {
             e.printStackTrace();
             return false;

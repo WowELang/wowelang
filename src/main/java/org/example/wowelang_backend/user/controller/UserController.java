@@ -40,6 +40,7 @@ public class UserController {
         return ApiResponse.onSuccess("알 수 없는 상태");
     }
 
+
     // 3단계: 인증 코드 검증 및 회원가입 완료
     @PatchMapping("/{userId}/complete")
     public ApiResponse<Long> verifyAndComplete(

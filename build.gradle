@@ -46,6 +46,11 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
+    // aws S3 의존성
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    // 파일 압축 의존성
+    implementation 'net.coobird:thumbnailator:0.4.19'
 }
 
 tasks.named('test') {
