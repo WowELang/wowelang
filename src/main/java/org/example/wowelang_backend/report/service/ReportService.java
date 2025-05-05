@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReportService {
 
+    private final ReportMailService reportMailService;
     private final ReportRepository reportRepository;
     private final ReportCategoryRepository reportCategoryRepository;
     private final UserRepository userRepository;
@@ -35,6 +36,8 @@ public class ReportService {
         Report report = Report.createReport(reportCreateDTO, reportingUser, reportedUser, category);
 
         reportRepository.save(report);
+
+        reportMailService.sendReportNotification(report);
         return report.getId();
     }
 }

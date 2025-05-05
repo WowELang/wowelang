@@ -46,6 +46,9 @@ dependencies {
 
     // 파일 압축 의존성
     implementation 'net.coobird:thumbnailator:0.4.19'
+
+    // 메일 관련 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {
