@@ -23,6 +23,10 @@ public class Report extends BaseEntity {
     @Column(name = "report_reason")
     private String reportReason;
 
+    @Column(name = "report_target")
+    @Enumerated(EnumType.STRING)
+    private ReportTarget reportTarget;
+
     @OneToOne
     @JoinColumn(name = "reporting_user_id")
     private User reportingUser;
@@ -38,6 +42,7 @@ public class Report extends BaseEntity {
     public static Report createReport(ReportCreateDTO reportCreateDTO, User reportingUser, User reportedUser, ReportCategory category) {
         return Report.builder()
                 .reportReason(reportCreateDTO.getReportReason())
+                .reportTarget(reportCreateDTO.getReportTarget())
                 .reportingUser(reportingUser)
                 .reportedUser(reportedUser)
                 .reportCategory(category)
