@@ -1,4 +1,4 @@
-package org.example.wowelang_backend.report;
+package org.example.wowelang_backend.report.domain;
 
 /**
  * 상업적 광고 및 판매 → Commercial Advertising & Sales

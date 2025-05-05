@@ -1,4 +1,4 @@
-package org.example.wowelang_backend.report;
+package org.example.wowelang_backend.report.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
