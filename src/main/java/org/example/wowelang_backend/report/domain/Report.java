@@ -3,6 +3,7 @@ package org.example.wowelang_backend.report.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.wowelang_backend.common.BaseEntity;
+import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
 import org.example.wowelang_backend.report.dto.ReportCreateDTO;
 import org.example.wowelang_backend.user.domain.User;
 
@@ -40,6 +41,10 @@ public class Report extends BaseEntity {
     private ReportCategory reportCategory;
 
     public static Report createReport(ReportCreateDTO reportCreateDTO, User reportingUser, User reportedUser, ReportCategory category) {
+        if(reportingUser.getId().equals(reportedUser.getId())) {
+            throw new IllegalArgumentException(ErrorStatus.SELF_REPORT_NOT_ALLOWED.getMessage());
+        }
+
         return Report.builder()
                 .reportReason(reportCreateDTO.getReportReason())
                 .reportTarget(reportCreateDTO.getReportTarget())
