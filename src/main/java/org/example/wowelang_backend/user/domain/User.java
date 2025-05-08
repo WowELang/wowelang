@@ -45,6 +45,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Usertype usertype;
 
+    //매칭 허용 여부 플래그
+    private Boolean isOn = false;
+
     // 재학생 튜터의 경우 이메일 인증 여부 플래그
     private Boolean isEmailVerified = false;
 

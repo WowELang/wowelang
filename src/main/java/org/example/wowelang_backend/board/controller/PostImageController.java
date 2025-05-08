@@ -1,3 +1,4 @@
+/*
 package org.example.wowelang_backend.board.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,3 +26,4 @@ public class PostImageController {
 
     }
 }
+*/

@@ -13,11 +13,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /*
-      POST /auth/login
-      @param requestDto { loginId, password }
-      @return ApiResponse에 래핑된 JWT 토큰
-     */
+    // @return ApiResponse에 래핑된 JWT 토큰
     @PostMapping("/login")
     public ApiResponse<String> login(@RequestBody LoginRequestDto requestDto) {
         String token = authService.login(requestDto);

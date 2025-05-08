@@ -2,13 +2,10 @@ package org.example.wowelang_backend.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
-import org.example.wowelang_backend.common.apiPayLoad.GlobalResponseDTO;
-import org.example.wowelang_backend.user.dto.ClearEmailDto;
 import org.example.wowelang_backend.user.dto.LoginIdCheckReqDto;
 import org.example.wowelang_backend.user.dto.UserSignupReqDto;
 import org.example.wowelang_backend.user.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -31,13 +28,8 @@ public class UserController {
     @PostMapping("/{userId}/email-verification")
     public ApiResponse<String> sendEmail(@PathVariable Long userId) {
         boolean sent = userService.sendVerificationEmail(userId);
-        // boolean 값에 따라 컨트롤러가 메시지를 설정 가능.
-        if (sent) {
-            // userType에 따라 메시지 달라질 수 있음 (예: 유학생은 따로 처리)
-            return ApiResponse.onSuccess("인증 메일이 발송되었습니다.");
-        }
-        // 실패는 서비스에서 이미 예외로 처리되므로 여기는 도달하지 않음.
-        return ApiResponse.onSuccess("알 수 없는 상태");
+        // 여기는 sent == true 인 경우만 오므로, 바로 성공 메시지 반환
+        return ApiResponse.onSuccess("인증 메일이 발송되었습니다.");
     }
 
 

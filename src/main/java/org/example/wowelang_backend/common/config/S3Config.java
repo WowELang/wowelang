@@ -1,3 +1,4 @@
+/*
 package org.example.wowelang_backend.common.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -31,3 +32,4 @@ public class S3Config {
                 .build();
     }
 }
+*/
