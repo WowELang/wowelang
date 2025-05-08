@@ -1,4 +1,3 @@
-/*
 package org.example.wowelang_backend.board.service;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -98,4 +97,3 @@ public class ImageService {
         }
     }
 }
-*/

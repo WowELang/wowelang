@@ -1,4 +1,3 @@
-/*
 package org.example.wowelang_backend.board.controller;
 
 import org.example.wowelang_backend.board.dto.*;
@@ -55,4 +54,4 @@ public class PostController {
         // TODO: 추후 커스텀 응답 추가
         return ResponseEntity.noContent().build();
     }
-}*/
+}
