@@ -51,6 +51,9 @@ dependencies {
 
     // 파일 압축 의존성
     implementation 'net.coobird:thumbnailator:0.4.19'
+
+    // 스웨거 의존성
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 }
 
 tasks.named('test') {
