@@ -5,11 +5,11 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
-import org.example.wowelang_backend.security.CustomUserDetailsService;
+import org.example.wowelang_backend.security.custom.CustomUserDetails;
+import org.example.wowelang_backend.security.custom.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -51,7 +51,7 @@ public class JwtTokenProvider {
       @param userId 사용자 식별자 (예: user의 id 값)
       @param roles  사용자 권한 목록 (userType enum 사용)
       @return 생성된 JWT 토큰 문자열*/
-    public String createToken(String userId, List<String> roles){
+    public String createToken(String userId, String loginId, List<String> roles){
         // 현재 시간과 만료 시간 설정
         Date now = new Date();
         Date validity = new Date(now.getTime() + tokenValidityInSeconds * 1000);
@@ -59,6 +59,7 @@ public class JwtTokenProvider {
         // 토큰 빌더를 통해 토큰 생성 및 서명
         return Jwts.builder()
                 .setSubject(userId)
+                .claim("login_id", loginId)
                 .claim("roles", roles)   //subject 설정
                 .setIssuedAt(now)           // 발행 시간
                 .setExpiration(validity)    // 만료 시간
@@ -135,14 +136,16 @@ public class JwtTokenProvider {
         }
     }
 
-    /* 토큰으로부터 Authentication 객체 생성 */
+    // 토큰으로부터 Authentication 객체 생성
+    // 4) 토큰 검증 시에도, subject(userId) → loadById() 로만 조회
     public Authentication getAuthentication(String token) {
-        String loginId = getUserId(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginId);
-        return new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities()
-        );
+        // 1) 토큰에서 subject(userId) 꺼내기
+        Long userId = Long.valueOf(getUserId(token));
+
+        // 2) CustomUserDetailsService의 loadById() 호출
+        CustomUserDetails cd = userDetailsService.loadById(userId);
+
+        // 3) Authentication 객체 생성
+        return new UsernamePasswordAuthenticationToken(cd, null, cd.getAuthorities());
     }
 }

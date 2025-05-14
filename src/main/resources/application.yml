@@ -63,3 +63,12 @@ spring:
     hibernate:
       ddl-auto:
     show-sql: true
+
+---
+security:
+  debug: true
+
+logging:
+  level:
+    org.springframework.security.web: TRACE
+    org.springframework.security.authentication: TRACE
