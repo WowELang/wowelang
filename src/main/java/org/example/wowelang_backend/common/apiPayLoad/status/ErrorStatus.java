@@ -21,6 +21,10 @@ public enum ErrorStatus implements BaseCode {
     //게시판 관련 에러
     BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시판을 찾을 수 없습니다."),
 
+    // 신고 관련 에러
+    REPORT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 신고 카테고리를 찾을 수 없습니다."),
+    SELF_REPORT_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "자기자신을 신고할 수 없습니다."),
+
     //아이디, 이메일 중복 관련 에러
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 등록된 이메일입니다."),
     LOGINID_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
