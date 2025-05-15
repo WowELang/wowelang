@@ -74,6 +74,13 @@ jobs:
           echo "S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}" >> .env
           echo "S3_BUCKET=${{ secrets.S3_BUCKET }}" >> .env
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> .env
+          echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env
+          echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> .env
+          echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
+          echo "MAIL_SMTP_AUTH=${{ secrets.MAIL_SMTP_AUTH }}" >> .env
+          echo "MAIL_STARTTLS_ENABLE=${{ secrets.MAIL_STARTTLS_ENABLE }}" >> .env
 
       - name: Copy .env to server
         uses: appleboy/scp-action@master
