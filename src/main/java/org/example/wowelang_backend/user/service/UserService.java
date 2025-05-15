@@ -7,13 +7,11 @@ import org.example.wowelang_backend.user.domain.KoreanTutorAttribute;
 import org.example.wowelang_backend.user.domain.User;
 import org.example.wowelang_backend.user.domain.Usertype;
 import org.example.wowelang_backend.user.dto.UserSignupReqDto;
-import org.example.wowelang_backend.user.dto.VerificationDto;
 import org.example.wowelang_backend.user.repository.ForeignTuteeRepository;
 import org.example.wowelang_backend.user.repository.KoreanTutorRepository;
 import org.example.wowelang_backend.user.repository.UserRepository;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final KoreanTutorRepository koreanTutorRepository;
     private final ForeignTuteeRepository foreignTuteeRepository;
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final UnivcertService univcertService;
 
     // 1단계: 기본 정보 입력 후 임시 사용자 생성
@@ -47,8 +45,7 @@ public class UserService {
         User user = User.builder()
                 .loginId(dto.getLoginId())
                 .email(dto.getEmail())
-                //.password(passwordEncoder.encode(dto.getPassword()))
-                .password(dto.getPassword())//로그인 구현시 변경
+                .password(passwordEncoder.encode(dto.getPassword()))
                 .name(dto.getName())
                 .birthday(dto.getBirthday())
                 .major(dto.getMajor())
@@ -108,7 +105,9 @@ public class UserService {
         }
 
         // 4) 이미 인증이 완료된 경우에는 별도 발송 없이 false 반환 (또는 예외 처리)
-        return false;
+        throw new IllegalStateException(
+                ErrorStatus.EMAIL_ALREADY_VERIFIED.getMessage()
+        );
     }
 
     //3단계: 인증코드 검증 및 가입 완료

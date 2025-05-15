@@ -20,7 +20,7 @@ public class UnivcertService {
         try{
             //api 호출
             String univName = "홍익대학교"; //앱 구성상 대학교 정보 받는 곳이 없으므로 홍대로 고정, 추후 수정 가능
-            boolean univCheck = false; //true -> 재학여부 확인
+            boolean univCheck = false; //true -> 재학여부 확인, false -> 다른 포털 사이트도 가능
             Map<String, Object> response = UnivCert.certify(apiKey, email, univName, univCheck);
             System.out.println("[UnivCert] sendCertifyMail response = " + response);
             return parseSuccess(response);
