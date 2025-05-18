@@ -45,5 +45,15 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
     }
 
+    // 409 Conflict: 이미 초기화된 상태에서 다시 init 시도 등
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalStateException(IllegalStateException e, HttpServletRequest request) {
+        GlobalResponseDTO errorResponse = GlobalResponseDTO.builder()
+                .isSuccess(false)
+                .httpStatus(HttpStatus.CONFLICT)
+                .message(e.getMessage())
+                .build();
 
+        return handleExceptionInternal(e, errorResponse, null, request);
+    }
 }
