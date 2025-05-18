@@ -29,7 +29,7 @@ public class JwtTokenProvider {
     @Value("${jwt.token-validity-in-seconds}")
     private Long tokenValidityInSeconds;
 
-    private final CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     // Bean 초기화 시점에, secretKey를 Base64로 인코딩하여 사용
     // JWT 라이브러리에서 요구하는 형식이며, 일관된 형식을 유지하기 위함
@@ -143,7 +143,7 @@ public class JwtTokenProvider {
         Long userId = Long.valueOf(getUserId(token));
 
         // 2) CustomUserDetailsService의 loadById() 호출
-        CustomUserDetails cd = userDetailsService.loadById(userId);
+        CustomUserDetails cd = customUserDetailsService.loadById(userId);
 
         // 3) Authentication 객체 생성
         return new UsernamePasswordAuthenticationToken(cd, null, cd.getAuthorities());
