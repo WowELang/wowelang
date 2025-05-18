@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -19,20 +19,20 @@ public class UserInterest {
     @EmbeddedId
     private UserInterestId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @MapsId("userId")
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name="user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @MapsId("interestId")
-    @JoinColumn(name = "interest_id")
+    @JoinColumn(name="interest_id")
     private Interest interest;
 
     public UserInterest(User user, Interest interest) {
         this.user = user;
         this.interest = interest;
-        // **ID를 직접 초기화**
+        // ID를 직접 초기화
         this.id = new UserInterestId(user.getId(), interest.getId());
     }
 }

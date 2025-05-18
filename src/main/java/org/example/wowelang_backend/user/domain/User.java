@@ -62,9 +62,6 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     private ForeignTuteeAttribute foreignTuteeAttribute;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserInterest> interests = new ArrayList<>();
-
     public void setInterestsInitialized(boolean interestsInitialized) {
         this.interestInitialized = interestsInitialized;
     }

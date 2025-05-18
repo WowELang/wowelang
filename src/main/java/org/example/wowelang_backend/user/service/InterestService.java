@@ -31,22 +31,35 @@ public class InterestService {
     public void initInterest(Long userId, List<Long> interestIds) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
         if (user.getInterestInitialized()) {
             throw new IllegalStateException(ErrorStatus.INTERESTS_ALREADY_IVITIALIZED.getMessage());
         }
-        //join 테이블에 저장
-        saveUserInterests(user, interestIds);
-        user.setInterestsInitialized(true);
+
+        // 유효한 Interest 엔티티만 조회
+        List<Interest> interests = interestRepository.findAllById(interestIds);
+        if (interests.size() != interestIds.size()) {
+            throw new IllegalArgumentException(ErrorStatus.INVALID_INTEREST_ID.getMessage());
+        }
+
+        // 조인 엔티티 저장
+        List<UserInterest> links = interests.stream()
+                .map(i -> new UserInterest(user, i))
+                .toList();
+        userInterestRepository.saveAll(links);
+
+        // 최초 설정 완료 플래그 변경
+        user.setInterestInitialized(true);
         userRepository.save(user);
     }
+
     //전체 관심사 목록 조회
     public List<InterestDto> getAllInterest() {
         return interestRepository.findAll().stream()
-                .map(i -> new InterestDto(
-                        i.getId(),
-                        i.getName()))
+                .map(i -> new InterestDto(i.getId(), i.getName()))
                 .toList();
     }
+
 
     //관심사 수정
     public void updateInterests(Long userId, List<Long> newInterestIds) {
@@ -57,20 +70,20 @@ public class InterestService {
             throw new IllegalStateException(ErrorStatus.INTERESTS_NOT_IVITIALIZED.getMessage());
         }
 
-        //1) 기존 저장된 관심사 ID 집합
-        List<UserInterest> existingLinks = userInterestRepository.findAllByUserId(userId);
-        Set<Long> existingIds = existingLinks.stream()
+        // 1) 기존 링크 조회
+        List<UserInterest> existing = userInterestRepository.findAllByUserId(userId);
+        Set<Long> existingIds = existing.stream()
                 .map(ui -> ui.getInterest().getId())
                 .collect(Collectors.toSet());
 
-        // 2) 요청으로 온 새 ID 집합
+        // 2) 요청받은 ID 집합
         Set<Long> newIds = new HashSet<>(newInterestIds);
 
-        // 3) 삭제할 ID = existingIds \ newIds
+        // 3) 삭제할 ID = existing \ new
         Set<Long> toRemove = new HashSet<>(existingIds);
         toRemove.removeAll(newIds);
 
-        // 4) 추가할 ID = newIds \ existingIds
+        // 4) 추가할 ID = new \ existing
         Set<Long> toAdd = new HashSet<>(newIds);
         toAdd.removeAll(existingIds);
 
@@ -81,13 +94,14 @@ public class InterestService {
 
         // 6) 추가
         if (!toAdd.isEmpty()) {
-            List<Interest> interests = interestRepository.findAllById(toAdd);
-            if (interests.size() != toAdd.size()) {
+            List<Interest> interestsToAdd = interestRepository.findAllById(toAdd);
+            if (interestsToAdd.size() != toAdd.size()) {
                 throw new IllegalArgumentException(ErrorStatus.INVALID_INTEREST_ID.getMessage());
             }
-            for (Interest i : interests) {
-                userInterestRepository.save(new UserInterest(user, i));
-            }
+            List<UserInterest> linksToAdd = interestsToAdd.stream()
+                    .map(i -> new UserInterest(user, i))
+                    .toList();
+            userInterestRepository.saveAll(linksToAdd);
         }
     }
 
