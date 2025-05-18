@@ -11,4 +11,6 @@ import java.util.Set;
 public interface UserInterestRepository extends JpaRepository<UserInterest, UserInterestId> {
     List<UserInterest> findAllByUserId(Long userId);
     void deleteByUserIdAndInterestIdIn(Long userId, Collection<Long> interestIds);
+
+    void deleteByUserId(Long userId);
 }
