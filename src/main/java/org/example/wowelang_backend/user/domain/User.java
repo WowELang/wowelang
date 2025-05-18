@@ -4,6 +4,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Entity
@@ -51,9 +53,19 @@ public class User {
     // 재학생 튜터의 경우 이메일 인증 여부 플래그
     private Boolean isEmailVerified = false;
 
+    // 초기 관심사 설정 여부 플래그
+    private Boolean interestInitialized = false;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     private KoreanTutorAttribute koreanTutorAttribute;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     private ForeignTuteeAttribute foreignTuteeAttribute;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserInterest> interests = new ArrayList<>();
+
+    public void setInterestsInitialized(boolean interestsInitialized) {
+        this.interestInitialized = interestsInitialized;
+    }
 }

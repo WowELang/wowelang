@@ -24,6 +24,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
@@ -47,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/user/*/email-verification").permitAll()
                         .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/env", "/hc").permitAll()
+                        // **스프링 에러 핸들러 경로 허용**
+                        .requestMatchers("/error").permitAll()
                         // 이 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
@@ -70,10 +73,5 @@ public class SecurityConfig {
             AuthenticationConfiguration authConfig
     ) throws Exception {
         return authConfig.getAuthenticationManager();
-    }
-
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtTokenProvider);
     }
 }
