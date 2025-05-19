@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/user/*/email-verification").permitAll()
                         .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/env", "/hc", "/error").permitAll()
+
                         // 이 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
