@@ -6,9 +6,13 @@ import org.example.wowelang_backend.user.domain.ForeignTuteeAttribute;
 import org.example.wowelang_backend.user.domain.KoreanTutorAttribute;
 import org.example.wowelang_backend.user.domain.User;
 import org.example.wowelang_backend.user.domain.Usertype;
+import org.example.wowelang_backend.user.dto.CharacterInfoDto;
+import org.example.wowelang_backend.user.dto.InterestDto;
+import org.example.wowelang_backend.user.dto.UserProfileDto;
 import org.example.wowelang_backend.user.dto.UserSignupReqDto;
 import org.example.wowelang_backend.user.repository.ForeignTuteeRepository;
 import org.example.wowelang_backend.user.repository.KoreanTutorRepository;
+import org.example.wowelang_backend.user.repository.UserInterestRepository;
 import org.example.wowelang_backend.user.repository.UserRepository;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -28,6 +33,7 @@ public class UserService {
     private final ForeignTuteeRepository foreignTuteeRepository;
     private final PasswordEncoder passwordEncoder;
     private final UnivcertService univcertService;
+    private final UserInterestRepository userInterestRepository;
 
     // 1단계: 기본 정보 입력 후 임시 사용자 생성
     // 기본정보는 저장하지만 이메일 인증은 되지 않은 상태
@@ -147,5 +153,93 @@ public class UserService {
         if (userRepository.existsByLoginId(loginId)) {
             throw new IllegalArgumentException(ErrorStatus.LOGINID_DUPLICATE.getMessage());
         }
+    }
+
+    // 최초 닉네임 설정
+    public String setNickname(Long userId, String nickname) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        //최초 설정 여부 검사
+        if (user.isNicknameInitialized()) {
+            throw new IllegalStateException("이미 닉네임이 설정되었습니다.");
+        }
+
+        user.initNickname(nickname);
+        userRepository.save(user);
+
+        return user.getNickname();
+    }
+
+    // 최초 캐릭터 설정
+    public CharacterInfoDto setCharacter(Long userId, int colorId, int maskId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        //최초 설정 여부 검사
+        if (user.isCharacterInitialized()) {
+            throw new IllegalStateException("이미 캐릭터가 설정되었습니다.");
+        }
+
+        user.initCharacter(colorId, maskId);
+        userRepository.save(user);
+
+        // 컨트롤러로 보낼 DTO 생성
+        return new CharacterInfoDto(user.getColorId(), user.getMaskId());
+    }
+
+    // 내 프로필 조회 (PK, 닉네임, 캐릭터, 관심사)
+    @Transactional(readOnly = true)
+    public UserProfileDto getMyProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        // 관심사 조회
+        List<InterestDto> interests = userInterestRepository.findAllByUserId(userId).stream()
+                .map(ui -> new InterestDto(ui.getInterest().getId(), ui.getInterest().getName()))
+                .toList();
+        // 캐릭터 정보
+        CharacterInfoDto character = new CharacterInfoDto(
+                user.getColorId(),
+                user.getMaskId()
+        );
+        return new UserProfileDto(
+                user.getId(),
+                user.getNickname(),
+                character,
+                interests
+        );
+    }
+
+    // 닉네임 수정 (언제든)
+    public String updateNickname(Long userId, String newNickname) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 단순 setter 로 덮어쓰기
+        user.setNickname(newNickname);
+        // 초기화 플래그가 false 면 true 로, true 면 그대로
+        if (!user.isNicknameInitialized()) {
+            user.setNicknameInitialized(true);
+        }
+        userRepository.save(user);
+
+        return user.getNickname();
+    }
+
+    // 캐릭터 수정 (언제든)
+    public CharacterInfoDto updateCharacter(Long userId, int colorId, int maskId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 단순 setter 로 덮어쓰기
+        user.setColorId(colorId);
+        user.setMaskId(maskId);
+        if (!user.isCharacterInitialized()) {
+            user.setCharacterInitialized(true);
+        }
+        userRepository.save(user);
+
+        return new CharacterInfoDto(user.getColorId(), user.getMaskId());
     }
 }

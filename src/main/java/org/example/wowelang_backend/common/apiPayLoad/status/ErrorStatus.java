@@ -31,6 +31,8 @@ public enum ErrorStatus implements BaseCode {
 
     // 사용자 관련 에러
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
+    INITIALIZED_NICKNAME(HttpStatus.MULTI_STATUS, "이미 닉네임이 설정되었습니다."),
+    INITIALIZED_CHARCTER(HttpStatus.MULTI_STATUS, "이미 캐릭터가 설정되었습니다."),
 
     // 인증 관련 에러
     INVALID_USER(HttpStatus.BAD_REQUEST, "아이디 혹은 비밀번호가 일치하지 않습니다."),
