@@ -1,0 +1,17 @@
+package org.example.wowelang_backend.user.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserProfileDto {
+    private Long userId;
+    private String nickname;
+    private CharacterInfoDto character;
+    private List<InterestDto> interests;
+}

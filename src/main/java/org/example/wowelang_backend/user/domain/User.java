@@ -48,7 +48,7 @@ public class User {
     private Usertype usertype;
 
     //매칭 허용 여부 플래그
-    private Boolean isOn = false;
+    private Boolean isOn = true;
 
     // 재학생 튜터의 경우 이메일 인증 여부 플래그
     private Boolean isEmailVerified = false;
@@ -64,5 +64,35 @@ public class User {
 
     public void setInterestsInitialized(boolean interestsInitialized) {
         this.interestInitialized = interestsInitialized;
+    }
+
+    // 닉네임
+    @Column(name = "nickname", unique = true)
+    private String nickname;
+
+    // 닉네임 설정 완료 플래그
+    @Column(name = "nickname_initialized")
+    private boolean nicknameInitialized = false;
+
+    // 색깔, 표정
+    @Column(name = "color")
+    private Integer colorId;
+
+    @Column(name = "mask")
+    private Integer maskId;
+
+    // 최초 캐릭터 설정 완료 플래그
+    @Column(name = "character_initialized")
+    private boolean characterInitialized = false;
+
+    public void initNickname(String nickname) {
+        this.nickname = nickname;
+        this.nicknameInitialized = true;
+    }
+
+    public void initCharacter(int colorId, int maskId) {
+        this.colorId = colorId;
+        this.maskId = maskId;
+        this.characterInitialized = true;
     }
 }
