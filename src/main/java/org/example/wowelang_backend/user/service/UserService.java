@@ -203,11 +203,24 @@ public class UserService {
                 user.getColorId(),
                 user.getMaskId()
         );
+
+        //유저 국적 정보 추가
+        String country = null;
+        if (user.getUsertype() == Usertype.FOREIGN){
+            ForeignTuteeAttribute attr = user.getForeignTuteeAttribute();
+            if (attr != null) {
+                country = attr.getCountry();
+            }
+        }
         return new UserProfileDto(
                 user.getId(),
                 user.getNickname(),
                 character,
-                interests
+                interests,
+                user.getName(),
+                user.getMajor(),
+                user.getUsertype(),
+                country
         );
     }
 
