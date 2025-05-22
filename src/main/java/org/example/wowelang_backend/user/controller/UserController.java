@@ -102,12 +102,12 @@ public class UserController {
     }
 
     // 내 프로필 조회
+    // 프론트 엔드 요청상 순수 dto만 반환
     @GetMapping("/me/profile")
-    public ApiResponse<UserProfileDto> getProfile(
+    public UserProfileDto getProfile(
             @AuthenticationPrincipal CustomUserDetails me
     ) {
-        UserProfileDto profile = userService.getMyProfile(me.getId());
-        return ApiResponse.onSuccess(profile);
+        return userService.getMyProfile(me.getId());
     }
 
     // 닉네임 수정
