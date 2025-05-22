@@ -103,11 +103,10 @@ public class UserController {
 
     // 내 프로필 조회
     @GetMapping("/me/profile")
-    public ApiResponse<UserProfileDto> getProfile(
+    public UserProfileDto getProfile(
             @AuthenticationPrincipal CustomUserDetails me
     ) {
-        UserProfileDto profile = userService.getMyProfile(me.getId());
-        return ApiResponse.onSuccess(profile);
+        return userService.getMyProfile(me.getId());
     }
 
     // 닉네임 수정
