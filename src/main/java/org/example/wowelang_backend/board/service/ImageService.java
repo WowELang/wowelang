@@ -31,20 +31,20 @@ public class ImageService {
     private String bucket;
 
     @Transactional
-    public PostImageResponseDTO uploadCompressedImage(InputStream inputStream, String filename, String contentType) throws IOException {
+    public PostImageResponseDTO uploadCompressedImage(InputStream inputStream, Long contentLengthLong, String filename, String contentType) throws IOException {
         try {
-            ByteArrayOutputStream compressedOut = new ByteArrayOutputStream();
+            // ByteArrayOutputStream compressedOut = new ByteArrayOutputStream();
+            //
+            // Thumbnails.of(inputStream)
+            //         .size(1024, 1024)
+            //         .outputQuality(1.0)
+            //         .outputFormat("jpg")
+            //         .toOutputStream(compressedOut);
+            //
+            // byte[] compressedImage = compressedOut.toByteArray();
+            // InputStream compressedInputStream = new ByteArrayInputStream(compressedImage);
 
-            Thumbnails.of(inputStream)
-                    .size(1024, 1024)
-                    .outputQuality(1.0)
-                    .outputFormat("jpg")
-                    .toOutputStream(compressedOut);
-
-            byte[] compressedImage = compressedOut.toByteArray();
-            InputStream compressedInputStream = new ByteArrayInputStream(compressedImage);
-
-            String extension = ".jpg";
+            String extension = getExtension(contentType);
             String uuid = UUID.randomUUID().toString();
 
             // 파일 임시 업로드
@@ -52,10 +52,10 @@ public class ImageService {
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(contentType);
-            metadata.setContentLength(compressedImage.length);
+            metadata.setContentLength(contentLengthLong);
 
             try {
-                amazonS3.putObject(new PutObjectRequest(bucket, key, compressedInputStream, metadata));
+                amazonS3.putObject(new PutObjectRequest(bucket, key, inputStream, metadata));
             } catch (Exception e) {
                 throw new RuntimeException("S3 업로드 중 에러 발생");
             }
@@ -72,6 +72,16 @@ public class ImageService {
         } catch (Exception e) {
             throw new RuntimeException("이미지 업로드 중 에러 발생");
         }
+    }
+
+    // 확장자 설정 메서드
+    private String getExtension(String contentType) {
+		return switch (contentType) {
+			case "image/jpeg", "image/jpg" -> ".jpg";
+			case "image/png" -> ".png";
+			case "image/gif" -> ".gif";
+			default -> "";
+		};
     }
 
     @Transactional
