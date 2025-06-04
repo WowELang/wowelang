@@ -32,7 +32,7 @@ public class InterestService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
-        if (user.getInterestInitialized()) {
+        if (Boolean.TRUE.equals(user.getInterestInitialized())) {
             throw new IllegalStateException(ErrorStatus.INTERESTS_ALREADY_IVITIALIZED.getMessage());
         }
 

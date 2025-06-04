@@ -1,19 +1,14 @@
 package org.example.wowelang_backend.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
-import org.example.wowelang_backend.common.apiPayLoad.GlobalResponseDTO;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
 import org.example.wowelang_backend.user.dto.*;
 import org.example.wowelang_backend.user.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -35,16 +30,16 @@ public class UserController {
     }
 
     // 2단계: 인증 메일 발송
-    @PostMapping("/{userId}/email-verification")
+    @PostMapping("/email-verification")
     @Operation(description = "유저에게 인증 메일(코드)을 발송", summary = "유저 인증 메일 발송")
-    public ApiResponse<String> sendEmail(@PathVariable Long userId) {
-        boolean sent = userService.sendVerificationEmail(userId);
-        // boolean 값에 따라 컨트롤러가 메시지를 설정 가능.
+    public ApiResponse<String> sendEmail(
+            @RequestBody EmailReqDto dto
+    ) {
+        boolean sent = userService.sendVerificationEmail(dto.getEmail());
         if (sent) {
-            // userType에 따라 메시지 달라질 수 있음 (예: 유학생은 따로 처리)
             return ApiResponse.onSuccess("인증 메일이 발송되었습니다.");
         }
-        // 실패는 서비스에서 이미 예외로 처리되므로 여기는 도달하지 않음.
+        // 이 라인에 도달할 일은 없지만, 안정성을 위해 남겨둡니다.
         return ApiResponse.onSuccess("알 수 없는 상태");
     }
 
@@ -61,11 +56,12 @@ public class UserController {
     }
 
     // 이메일 인증 초기화
-    @DeleteMapping("/{userId}/email-verification")
+    @DeleteMapping("/email-verification")
     @Operation(description = "이메일 인증을 초기화", summary = "메일 인증 초기화")
-    public ApiResponse<String> clearEmail(@PathVariable Long userId,
-                                          @RequestBody Map<String, String> body) {
-        String email = body.get("email");
+    public ApiResponse<String> clearEmail(
+            @RequestBody EmailReqDto dto
+    ) {
+        String email = dto.getEmail();
         String result = userService.clearCertification(email);
         return ApiResponse.onSuccess(result);
     }
@@ -80,29 +76,31 @@ public class UserController {
 
     // 최초 닉네임 설정
     @PostMapping("/me/nickname")
+    @Operation(description = "최초 로그인 시 닉네임 설정", summary = "닉네임 설정")
     public ApiResponse<Void> initNickname(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String, String> body
+            @RequestBody NicknameReqDto dto
     ) {
-        String nickname = body.get("nickname");
+        String nickname = dto.getNickname();
         userService.setNickname(me.getId(), nickname);
         return ApiResponse.created(null);
     }
 
     // 최초 캐릭터 설정 (색깔, 표정)
     @PostMapping("/me/character")
+    @Operation(description = "최초 로그인 시 아바타 설정", summary = "아바타 설정")
     public ApiResponse<Void> initCharacter(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String, Integer> body
+            @RequestBody CharacterReqDto dto
     ) {
-        int colorId = body.get("colorId");
-        int maskId  = body.get("maskId");
-        userService.setCharacter(me.getId(), colorId, maskId);
+        userService.setCharacter(me.getId(), dto.getColorId(), dto.getMaskId());
         return ApiResponse.created(null);
     }
 
     // 내 프로필 조회
     @GetMapping("/me/profile")
+    @Operation(description = "내 정보 조회", summary = "내 정보 조회")
+
     public UserProfileDto getProfile(
             @AuthenticationPrincipal CustomUserDetails me
     ) {
@@ -111,24 +109,53 @@ public class UserController {
 
     // 닉네임 수정
     @PutMapping("/me/nickname")
+    @Operation(description = "닉네임 수정", summary = "닉네임 수정")
     public ApiResponse<String> updateNickname(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String,String> body
+            @RequestBody NicknameReqDto dto
     ) {
-        String newNickname = body.get("nickname");
-        String saved = userService.updateNickname(me.getId(), newNickname);
+        String saved = userService.updateNickname(me.getId(), dto.getNickname());
         return ApiResponse.onSuccess(saved);
     }
 
     // 캐릭터 수정
     @PutMapping("/me/character")
+    @Operation(description = "아바타 수정", summary = "아바타 수정")
     public ApiResponse<CharacterInfoDto> updateCharacter(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String,Integer> body
+            @RequestBody CharacterReqDto dto
     ) {
-        int colorId = body.get("colorId");
-        int maskId  = body.get("maskId");
-        CharacterInfoDto dto = userService.updateCharacter(me.getId(), colorId, maskId);
-        return ApiResponse.onSuccess(dto);
+        CharacterInfoDto responseDto = userService.updateCharacter(
+                me.getId(),
+                dto.getColorId(),
+                dto.getMaskId()
+        );
+        return ApiResponse.onSuccess(responseDto);
     }
+
+    //비밀번호 변경
+    @PutMapping("/me/password")
+    @Operation(description = "비밀번호 변경", summary = "비밀번호 변경")
+    public ApiResponse<Void> changePassword(
+            @AuthenticationPrincipal CustomUserDetails me,
+            @RequestBody ChangePasswordReqDto req
+    ) {
+        userService.changePassword(
+                me.getId(),
+                req.getCurrentPassword(),
+                req.getNewPassword()
+        );
+        return ApiResponse.onSuccess(null);
+    }
+
+    //회원탈퇴
+    @DeleteMapping("/me")
+    @Operation(description = "회원탈퇴", summary = "탈퇴")
+    public ResponseEntity<Void> deleteAccount(
+            @AuthenticationPrincipal CustomUserDetails me
+    ) {
+        userService.deleteAccount(me.getId());
+        return ResponseEntity.noContent().build(); // HTTP 204
+    }
+
 }

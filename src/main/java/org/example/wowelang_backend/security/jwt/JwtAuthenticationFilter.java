@@ -55,8 +55,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if ("/user/check-login-id".equals(path) && "POST".equals(method)) {
             return true;
         }
-        // 3) POST /user/{id}/email-verification (메일발송/초기화)
-        if (path.matches("^/user/\\d+/email-verification$") && "POST".equals(method)) {
+        // 3) POST /user/email-verification (메일발송/초기화)
+        if (path.matches("^/user/email-verification$") && "POST".equals(method)) {
             return true;
         }
         // 4) PATCH /user/{id}/complete (코드검증+가입완료)
@@ -67,8 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if ("/auth/login".equals(path) && "POST".equals(method)) {
             return true;
         }
-        // 6) DELETE /user/{id}/email-verification (메일발송/초기화)
-        if (path.matches("^/user/\\d+/email-verification$") && "DELETE".equals(method)) {
+        // 6) DELETE /user/email-verification (메일발송/초기화)
+        if (path.matches("^/user/email-verification$") && "DELETE".equals(method)) {
             return true;
         }
 

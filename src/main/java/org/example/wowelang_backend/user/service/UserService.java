@@ -83,9 +83,9 @@ public class UserService {
     }
 
     // 2단계: 재학생 튜터일 경우, 인증 진행
-    public boolean sendVerificationEmail(Long userId) {
-        // 1) 사용자 확인
-        User user = userRepository.findById(userId)
+    public boolean sendVerificationEmail(String email) {
+        // 1) 이메일로 사용자 확인
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException(
                         ErrorStatus.USER_NOT_FOUND.getMessage()
                 ));
@@ -162,7 +162,7 @@ public class UserService {
 
         //최초 설정 여부 검사
         if (user.isNicknameInitialized()) {
-            throw new IllegalStateException("이미 닉네임이 설정되었습니다.");
+            throw new IllegalStateException(ErrorStatus.INITIALIZED_NICKNAME.getMessage());
         }
 
         user.initNickname(nickname);
@@ -224,10 +224,10 @@ public class UserService {
         );
     }
 
-    // 닉네임 수정 (언제든)
+    // 닉네임 수정
     public String updateNickname(Long userId, String newNickname) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         // 단순 setter 로 덮어쓰기
         user.setNickname(newNickname);
@@ -243,7 +243,7 @@ public class UserService {
     // 캐릭터 수정 (언제든)
     public CharacterInfoDto updateCharacter(Long userId, int colorId, int maskId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         // 단순 setter 로 덮어쓰기
         user.setColorId(colorId);
@@ -254,5 +254,35 @@ public class UserService {
         userRepository.save(user);
 
         return new CharacterInfoDto(user.getColorId(), user.getMaskId());
+    }
+
+    //비밀번호 변경
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        // 1) 현재 비밀번호 검증
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException(ErrorStatus.INVALID_PASSWORD.getMessage());
+        }
+
+        // 2) 새 비밀번호 인코딩 → 저장
+        String encoded = passwordEncoder.encode(newPassword);
+        user.setPassword(encoded);
+        userRepository.save(user);
+    }
+
+    //회원탈퇴
+    public void deleteAccount(Long userId) {
+        // 1) 실제 DB에서 삭제하지 않고, isDeleted=true 로 마킹
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.INVALID_USER.getMessage()));
+
+        // (선택) 관심사, ForeignTutee, KoreanTutor 등 연관 객체도 논리 삭제를 원하면 각각의 엔티티에 isDeleted 필드를 추가하고 여기서 또 마킹하세요.
+        // 만약 완전 삭제가 필요하다면 userInterestRepository.deleteByUserId(userId) 등을 그대로 호출해도 됩니다.
+        // 예시: userInterestRepository.deleteByUserId(userId);
+
+        user.delete();  // 엔티티에 정의한 delete() 호출 → isDeleted=true
+        userRepository.save(user);
     }
 }
