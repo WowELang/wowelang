@@ -100,6 +100,7 @@ public class UserController {
     // 내 프로필 조회
     @GetMapping("/me/profile")
     @Operation(description = "내 정보 조회", summary = "내 정보 조회")
+
     public UserProfileDto getProfile(
             @AuthenticationPrincipal CustomUserDetails me
     ) {
