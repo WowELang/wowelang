@@ -7,6 +7,10 @@ import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
 import org.example.wowelang_backend.user.dto.*;
 import org.example.wowelang_backend.user.service.UserService;
+<<<<<<< HEAD
+=======
+import org.springframework.http.ResponseEntity;
+>>>>>>> 9e138d4 (Refactor : (Domain) 유저 프로필 관련 api 요청 방식 변경(#71) (#72))
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
