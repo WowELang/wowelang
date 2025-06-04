@@ -18,9 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByLoginId(String loginId);
 
     // 논리 삭제된 유저를 제외하고 찾기
-    @Query("SELECT u FROM User u WHERE u.id = :id AND u.isDelete = false")
-    Optional<User> findActiveById(@Param("id") Long id);
-
-    @Query("SELECT u FROM User u WHERE u.loginId = :loginId AND u.isDelete = false")
-    Optional<User> findActiveByLoginId(@Param("loginId") String loginId);
+    Optional<User> findByIdAndIsDeleteFalse(Long id);
 }

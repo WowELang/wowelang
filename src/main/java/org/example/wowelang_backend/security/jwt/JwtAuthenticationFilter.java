@@ -60,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
         // 4) PATCH /user/{id}/complete (코드검증+가입완료)
-        if (path.matches("^/user/\\d+/complete$") && "PATCH".equals(method)) {
+        if (path.matches("^/user/complete$") && "PATCH".equals(method)) {
             return true;
         }
         // 5) POST /auth/login         (로그인)

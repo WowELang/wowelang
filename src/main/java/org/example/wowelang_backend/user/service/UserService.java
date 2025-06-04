@@ -117,8 +117,9 @@ public class UserService {
     }
 
     //3단계: 인증코드 검증 및 가입 완료
-    public Long verifyAndCompleteSignUp(Long userId, int code) {
-        User user = userRepository.findById(userId)
+    public Long verifyAndCompleteSignUp(String email, int code) {
+        // 1) 이메일 기준으로 User 조회
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         if (user.getUsertype() == Usertype.NATIVE) {
@@ -258,7 +259,7 @@ public class UserService {
 
     //비밀번호 변경
     public void changePassword(Long userId, String currentPassword, String newPassword) {
-        User user = userRepository.findActiveById(userId)
+        User user = userRepository.findByIdAndIsDeleteFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         // 1) 현재 비밀번호 검증
@@ -275,7 +276,7 @@ public class UserService {
     //회원탈퇴
     public void deleteAccount(Long userId) {
         // 1) 실제 DB에서 삭제하지 않고, isDeleted=true 로 마킹
-        User user = userRepository.findActiveById(userId)
+        User user = userRepository.findByIdAndIsDeleteFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.INVALID_USER.getMessage()));
 
         // (선택) 관심사, ForeignTutee, KoreanTutor 등 연관 객체도 논리 삭제를 원하면 각각의 엔티티에 isDeleted 필드를 추가하고 여기서 또 마킹하세요.
@@ -283,6 +284,5 @@ public class UserService {
         // 예시: userInterestRepository.deleteByUserId(userId);
 
         user.delete();  // 엔티티에 정의한 delete() 호출 → isDeleted=true
-        userRepository.save(user);
     }
 }
