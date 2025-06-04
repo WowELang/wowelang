@@ -255,4 +255,34 @@ public class UserService {
 
         return new CharacterInfoDto(user.getColorId(), user.getMaskId());
     }
+
+    //비밀번호 변경
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        // 1) 현재 비밀번호 검증
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException(ErrorStatus.INVALID_PASSWORD.getMessage());
+        }
+
+        // 2) 새 비밀번호 인코딩 → 저장
+        String encoded = passwordEncoder.encode(newPassword);
+        user.setPassword(encoded);
+        userRepository.save(user);
+    }
+
+    //회원탈퇴
+    public void deleteAccount(Long userId) {
+        // 1) 실제 DB에서 삭제하지 않고, isDeleted=true 로 마킹
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.INVALID_USER.getMessage()));
+
+        // (선택) 관심사, ForeignTutee, KoreanTutor 등 연관 객체도 논리 삭제를 원하면 각각의 엔티티에 isDeleted 필드를 추가하고 여기서 또 마킹하세요.
+        // 만약 완전 삭제가 필요하다면 userInterestRepository.deleteByUserId(userId) 등을 그대로 호출해도 됩니다.
+        // 예시: userInterestRepository.deleteByUserId(userId);
+
+        user.delete();  // 엔티티에 정의한 delete() 호출 → isDeleted=true
+        userRepository.save(user);
+    }
 }

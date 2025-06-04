@@ -7,6 +7,7 @@ import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
 import org.example.wowelang_backend.user.dto.*;
 import org.example.wowelang_backend.user.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -130,4 +131,30 @@ public class UserController {
         );
         return ApiResponse.onSuccess(responseDto);
     }
+
+    //비밀번호 변경
+    @PutMapping("/me/password")
+    @Operation(description = "비밀번호 변경", summary = "비밀번호 변경")
+    public ApiResponse<Void> changePassword(
+            @AuthenticationPrincipal CustomUserDetails me,
+            @RequestBody ChangePasswordReqDto req
+    ) {
+        userService.changePassword(
+                me.getId(),
+                req.getCurrentPassword(),
+                req.getNewPassword()
+        );
+        return ApiResponse.onSuccess(null);
+    }
+
+    //회원탈퇴
+    @DeleteMapping("/me")
+    @Operation(description = "회원탈퇴", summary = "탈퇴")
+    public ResponseEntity<Void> deleteAccount(
+            @AuthenticationPrincipal CustomUserDetails me
+    ) {
+        userService.deleteAccount(me.getId());
+        return ResponseEntity.noContent().build(); // HTTP 204
+    }
+
 }
