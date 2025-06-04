@@ -21,7 +21,6 @@ public class PostImageController {
                                                         @RequestParam("filename") String filename,
                                                         @RequestParam("contentType") String contentType) throws IOException {
 
-        return ApiResponse.onSuccess(fileService.uploadCompressedImage(request.getInputStream(), filename, contentType));
-
+        return ApiResponse.onSuccess(fileService.uploadCompressedImage(request.getInputStream(), request.getContentLengthLong(), filename, contentType));
     }
 }
