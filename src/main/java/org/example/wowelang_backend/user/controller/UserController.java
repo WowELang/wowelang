@@ -29,16 +29,16 @@ public class UserController {
     }
 
     // 2단계: 인증 메일 발송
-    @PostMapping("/{userId}/email-verification")
+    @PostMapping("/email-verification")
     @Operation(description = "유저에게 인증 메일(코드)을 발송", summary = "유저 인증 메일 발송")
-    public ApiResponse<String> sendEmail(@PathVariable Long userId) {
-        boolean sent = userService.sendVerificationEmail(userId);
-        // boolean 값에 따라 컨트롤러가 메시지를 설정 가능.
+    public ApiResponse<String> sendEmail(
+            @RequestBody EmailReqDto dto
+    ) {
+        boolean sent = userService.sendVerificationEmail(dto.getEmail());
         if (sent) {
-            // userType에 따라 메시지 달라질 수 있음 (예: 유학생은 따로 처리)
             return ApiResponse.onSuccess("인증 메일이 발송되었습니다.");
         }
-        // 실패는 서비스에서 이미 예외로 처리되므로 여기는 도달하지 않음.
+        // 이 라인에 도달할 일은 없지만, 안정성을 위해 남겨둡니다.
         return ApiResponse.onSuccess("알 수 없는 상태");
     }
 
@@ -55,11 +55,12 @@ public class UserController {
     }
 
     // 이메일 인증 초기화
-    @DeleteMapping("/{userId}/email-verification")
+    @DeleteMapping("/email-verification")
     @Operation(description = "이메일 인증을 초기화", summary = "메일 인증 초기화")
-    public ApiResponse<String> clearEmail(@PathVariable Long userId,
-                                          @RequestBody Map<String, String> body) {
-        String email = body.get("email");
+    public ApiResponse<String> clearEmail(
+            @RequestBody EmailReqDto dto
+    ) {
+        String email = dto.getEmail();
         String result = userService.clearCertification(email);
         return ApiResponse.onSuccess(result);
     }

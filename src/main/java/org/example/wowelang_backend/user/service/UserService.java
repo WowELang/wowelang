@@ -83,9 +83,9 @@ public class UserService {
     }
 
     // 2단계: 재학생 튜터일 경우, 인증 진행
-    public boolean sendVerificationEmail(Long userId) {
-        // 1) 사용자 확인
-        User user = userRepository.findById(userId)
+    public boolean sendVerificationEmail(String email) {
+        // 1) 이메일로 사용자 확인
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException(
                         ErrorStatus.USER_NOT_FOUND.getMessage()
                 ));
