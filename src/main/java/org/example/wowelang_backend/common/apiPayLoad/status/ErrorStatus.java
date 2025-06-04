@@ -42,6 +42,7 @@ public enum ErrorStatus implements BaseCode {
     EMAIL_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
     EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "이미 이메일 인증이 완료된 사용자입니다."),
     UNIVCERT_CLEAR_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UnivCert 초기화 실패"),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다"),
 
     //관심사 관련
     INTERESTS_ALREADY_IVITIALIZED(HttpStatus.ALREADY_REPORTED, "이미 초기화 되었습니다."),

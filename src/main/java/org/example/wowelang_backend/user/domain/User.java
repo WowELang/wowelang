@@ -85,6 +85,9 @@ public class User {
     @Column(name = "character_initialized")
     private boolean characterInitialized = false;
 
+    @Column(name = "is_delete")
+    private boolean isDelete = false;
+
     public void initNickname(String nickname) {
         this.nickname = nickname;
         this.nicknameInitialized = true;
@@ -94,5 +97,10 @@ public class User {
         this.colorId = colorId;
         this.maskId = maskId;
         this.characterInitialized = true;
+    }
+
+    // 논리 삭제 메소드
+    public void delete() {
+        this.isDelete = true;
     }
 }

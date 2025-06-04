@@ -162,7 +162,7 @@ public class UserService {
 
         //최초 설정 여부 검사
         if (user.isNicknameInitialized()) {
-            throw new IllegalStateException("이미 닉네임이 설정되었습니다.");
+            throw new IllegalStateException(ErrorStatus.INITIALIZED_NICKNAME.getMessage());
         }
 
         user.initNickname(nickname);
@@ -224,10 +224,10 @@ public class UserService {
         );
     }
 
-    // 닉네임 수정 (언제든)
+    // 닉네임 수정
     public String updateNickname(Long userId, String newNickname) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         // 단순 setter 로 덮어쓰기
         user.setNickname(newNickname);
@@ -243,7 +243,7 @@ public class UserService {
     // 캐릭터 수정 (언제든)
     public CharacterInfoDto updateCharacter(Long userId, int colorId, int maskId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         // 단순 setter 로 덮어쓰기
         user.setColorId(colorId);

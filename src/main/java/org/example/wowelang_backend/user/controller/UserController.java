@@ -1,19 +1,13 @@
 package org.example.wowelang_backend.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
-import org.example.wowelang_backend.common.apiPayLoad.GlobalResponseDTO;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
 import org.example.wowelang_backend.user.dto.*;
 import org.example.wowelang_backend.user.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -80,29 +74,30 @@ public class UserController {
 
     // 최초 닉네임 설정
     @PostMapping("/me/nickname")
+    @Operation(description = "최초 로그인 시 닉네임 설정", summary = "닉네임 설정")
     public ApiResponse<Void> initNickname(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String, String> body
+            @RequestBody NicknameReqDto dto
     ) {
-        String nickname = body.get("nickname");
+        String nickname = dto.getNickname();
         userService.setNickname(me.getId(), nickname);
         return ApiResponse.created(null);
     }
 
     // 최초 캐릭터 설정 (색깔, 표정)
     @PostMapping("/me/character")
+    @Operation(description = "최초 로그인 시 아바타 설정", summary = "아바타 설정")
     public ApiResponse<Void> initCharacter(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String, Integer> body
+            @RequestBody CharacterReqDto dto
     ) {
-        int colorId = body.get("colorId");
-        int maskId  = body.get("maskId");
-        userService.setCharacter(me.getId(), colorId, maskId);
+        userService.setCharacter(me.getId(), dto.getColorId(), dto.getMaskId());
         return ApiResponse.created(null);
     }
 
     // 내 프로필 조회
     @GetMapping("/me/profile")
+    @Operation(description = "내 정보 조회", summary = "내 정보 조회")
     public UserProfileDto getProfile(
             @AuthenticationPrincipal CustomUserDetails me
     ) {
@@ -111,24 +106,27 @@ public class UserController {
 
     // 닉네임 수정
     @PutMapping("/me/nickname")
+    @Operation(description = "닉네임 수정", summary = "닉네임 수정")
     public ApiResponse<String> updateNickname(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String,String> body
+            @RequestBody NicknameReqDto dto
     ) {
-        String newNickname = body.get("nickname");
-        String saved = userService.updateNickname(me.getId(), newNickname);
+        String saved = userService.updateNickname(me.getId(), dto.getNickname());
         return ApiResponse.onSuccess(saved);
     }
 
     // 캐릭터 수정
     @PutMapping("/me/character")
+    @Operation(description = "아바타 수정", summary = "아바타 수정")
     public ApiResponse<CharacterInfoDto> updateCharacter(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody Map<String,Integer> body
+            @RequestBody CharacterReqDto dto
     ) {
-        int colorId = body.get("colorId");
-        int maskId  = body.get("maskId");
-        CharacterInfoDto dto = userService.updateCharacter(me.getId(), colorId, maskId);
-        return ApiResponse.onSuccess(dto);
+        CharacterInfoDto responseDto = userService.updateCharacter(
+                me.getId(),
+                dto.getColorId(),
+                dto.getMaskId()
+        );
+        return ApiResponse.onSuccess(responseDto);
     }
 }

@@ -1,9 +1,11 @@
 package org.example.wowelang_backend.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
 import org.example.wowelang_backend.user.dto.InterestDto;
+import org.example.wowelang_backend.user.dto.InterestReqDto;
 import org.example.wowelang_backend.user.service.InterestService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ public class InterestController {
 
     // 전체 관심사 목록 조회
     @GetMapping
+    @Operation(description = "최초 로그인 시 관심사 설정", summary = "관심사 초기 설정")
     public ApiResponse<List<InterestDto>> getAll() {
         List<InterestDto> data = interestService.getAllInterest();
         return ApiResponse.onSuccess(data);
@@ -26,22 +29,25 @@ public class InterestController {
 
     // 최초 관심사 설정
     @PostMapping("/me")
+    @Operation(description = "관심사 수정", summary = "관심사 수정")
     public ApiResponse<List<Long>> initMyInterests(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody List<Long> interestIds
-    ) {
-        interestService.initInterest(me.getId(), interestIds);
-        // 생성된 리소스(최초 관심사 리스트)를 result 로 담아서 201 반환
-        return ApiResponse.created(interestIds);
+            @RequestBody InterestReqDto dto
+            ) {
+        List<Long> ids = dto.getInterestIds();
+        interestService.initInterest(me.getId(), ids);
+        // 생성된 리소스(최초 관심사 리스트)를 result로 담아서 201 반환
+        return ApiResponse.created(ids);
     }
 
     // 관심사 수정
     @PutMapping("/me")
     public ApiResponse<List<Long>> updateMyInterests(
             @AuthenticationPrincipal CustomUserDetails me,
-            @RequestBody List<Long> newInterestIds
+            @RequestBody InterestReqDto dto
     ) {
-        interestService.updateInterests(me.getId(), newInterestIds);
-        return ApiResponse.onSuccess(newInterestIds);
+        List<Long> newIds = dto.getInterestIds();
+        interestService.updateInterests(me.getId(), newIds);
+        return ApiResponse.onSuccess(newIds);
     }
 }
