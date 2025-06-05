@@ -82,7 +82,7 @@ public class UserService {
         return user.getId();
     }
 
-    // 2단계: 재학생 튜터일 경우, 인증 진행
+    // 2단계: 인증 메일 발송
     public boolean sendVerificationEmail(String email) {
         //새 인증 메일 발송
         boolean mailSent = univcertService.sendCertifyMail(email);
