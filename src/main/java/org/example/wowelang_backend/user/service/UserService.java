@@ -84,36 +84,14 @@ public class UserService {
 
     // 2단계: 재학생 튜터일 경우, 인증 진행
     public boolean sendVerificationEmail(String email) {
-        // 1) 이메일로 사용자 확인
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        ErrorStatus.USER_NOT_FOUND.getMessage()
-                ));
-
-        // 2) 유학생(Foreign)은 인증 메일 발송 없이 바로 true 반환
-        if (user.getUsertype() == Usertype.FOREIGN) {
-            return true;
+        //새 인증 메일 발송
+        boolean mailSent = univcertService.sendCertifyMail(email);
+        if (!mailSent) {
+            throw new IllegalStateException(
+                    ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage()
+            );
         }
-
-        // 3) 재학생(Native)이고 아직 인증되지 않은 경우에만 처리
-        if (!user.getIsEmailVerified()) {
-            if (univcertService.hasCertificationRequest(user.getEmail())) {
-                clearCertification(user.getEmail());
-            }
-            //새 인증 메일 발송
-            boolean mailSent = univcertService.sendCertifyMail(user.getEmail());
-            if (!mailSent) {
-                throw new IllegalStateException(
-                        ErrorStatus.CERTIFICATION_MAIL_FAILED.getMessage()
-                );
-            }
-            return true;
-        }
-
-        // 4) 이미 인증이 완료된 경우에는 별도 발송 없이 false 반환 (또는 예외 처리)
-        throw new IllegalStateException(
-                ErrorStatus.EMAIL_ALREADY_VERIFIED.getMessage()
-        );
+        return true;
     }
 
     //3단계: 인증코드 검증 및 가입 완료
