@@ -7,7 +7,6 @@ import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
 import org.example.wowelang_backend.user.dto.*;
 import org.example.wowelang_backend.user.service.UserService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,17 +43,17 @@ public class UserController {
     }
 
     // 3단계: 인증 코드 검증 및 가입 완료
-    @PatchMapping("/{userId}/complete")
+    @PatchMapping("/complete")
     @Operation(description = "발급받은 코드를 유저가 입력 후 회원가입 완료", summary = "인증 코드 검증")
     public ApiResponse<Long> verifyAndComplete(
-            @PathVariable Long userId,
-            @RequestBody Map<String, Integer> body
+            @RequestBody VerifyReqDto dto
     ) {
-        int code = body.get("code");
-        Long finalUserId = userService.verifyAndCompleteSignUp(userId, code);
+        Long finalUserId = userService.verifyAndCompleteSignUp(
+                dto.getEmail(),
+                dto.getCode()
+        );
         return ApiResponse.onSuccess(finalUserId);
     }
-
     // 이메일 인증 초기화
     @DeleteMapping("/email-verification")
     @Operation(description = "이메일 인증을 초기화", summary = "메일 인증 초기화")
@@ -151,11 +150,11 @@ public class UserController {
     //회원탈퇴
     @DeleteMapping("/me")
     @Operation(description = "회원탈퇴", summary = "탈퇴")
-    public ResponseEntity<Void> deleteAccount(
+    public ApiResponse<Object> deleteAccount(
             @AuthenticationPrincipal CustomUserDetails me
     ) {
         userService.deleteAccount(me.getId());
-        return ResponseEntity.noContent().build(); // HTTP 204
+        return ApiResponse.onSuccess(null);
     }
 
 }
