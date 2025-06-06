@@ -20,15 +20,7 @@ public class UserController {
 
     private final UserService userService;
 
-    // 1단계: 기본 정보 입력 후 사용자 생성
-    @PostMapping
-    @Operation(description = "기본 정보 입력 후 사용자 임시로 생성", summary = "유저 임시 생성 api")
-    public ApiResponse<Long> signUp(@RequestBody UserSignupReqDto dto) {
-        Long userId = userService.createTempUser(dto);
-        return ApiResponse.onSuccess(userId);
-    }
-
-    // 2단계: 인증 메일 발송
+    // 인증 메일 발송
     @PostMapping("/email-verification")
     @Operation(description = "유저에게 인증 메일(코드)을 발송", summary = "유저 인증 메일 발송")
     public ApiResponse<String> sendEmail(
@@ -49,7 +41,15 @@ public class UserController {
             @RequestBody VerifyReqDto dto
     ) {
         Long finalUserId = userService.verifyAndCompleteSignUp(
+                dto.getLoginId(),
                 dto.getEmail(),
+                dto.getPassword(),
+                dto.getName(),
+                dto.getBirthday(),
+                dto.getMajor(),
+                dto.getGender(),
+                dto.getUsertype(),
+                dto.getCountry(),
                 dto.getCode()
         );
         return ApiResponse.onSuccess(finalUserId);
