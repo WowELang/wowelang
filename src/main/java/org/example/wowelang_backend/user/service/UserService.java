@@ -2,10 +2,7 @@ package org.example.wowelang_backend.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
-import org.example.wowelang_backend.user.domain.ForeignTuteeAttribute;
-import org.example.wowelang_backend.user.domain.KoreanTutorAttribute;
-import org.example.wowelang_backend.user.domain.User;
-import org.example.wowelang_backend.user.domain.Usertype;
+import org.example.wowelang_backend.user.domain.*;
 import org.example.wowelang_backend.user.dto.CharacterInfoDto;
 import org.example.wowelang_backend.user.dto.InterestDto;
 import org.example.wowelang_backend.user.dto.UserProfileDto;
@@ -14,12 +11,12 @@ import org.example.wowelang_backend.user.repository.ForeignTuteeRepository;
 import org.example.wowelang_backend.user.repository.KoreanTutorRepository;
 import org.example.wowelang_backend.user.repository.UserInterestRepository;
 import org.example.wowelang_backend.user.repository.UserRepository;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -35,53 +32,6 @@ public class UserService {
     private final UnivcertService univcertService;
     private final UserInterestRepository userInterestRepository;
 
-    // 1단계: 기본 정보 입력 후 임시 사용자 생성
-    // 기본정보는 저장하지만 이메일 인증은 되지 않은 상태
-    public Long createTempUser(UserSignupReqDto dto) {
-        //이메일, 로그인 아이디 중복체크
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException(ErrorStatus.DUPLICATE_EMAIL.getMessage());
-        }
-        if (userRepository.existsByLoginId(dto.getLoginId())) {
-            throw new IllegalArgumentException(ErrorStatus.LOGINID_DUPLICATE.getMessage());
-        }
-
-
-        //임시 사용자 생성(isEmailVerified 기본값 false)
-        User user = User.builder()
-                .loginId(dto.getLoginId())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .name(dto.getName())
-                .birthday(dto.getBirthday())
-                .major(dto.getMajor())
-                .gender(dto.getGender())
-                .usertype(dto.getUsertype())
-                .isEmailVerified(false)
-                .build();
-
-        userRepository.save(user); // 유저 타입에 따라 외국인이면 바로 가입, 재학생이면 메일인증으로 진행
-
-        //유저타입별 추가 정보(이후 최종 가입 단계에서 사용)
-        if (dto.getUsertype() == Usertype.NATIVE) {//재학생
-            KoreanTutorAttribute tutor = KoreanTutorAttribute.builder()
-                    .user(user)
-                    .reputation(0L)
-                    .fixCount(0L)
-                    .build();
-            koreanTutorRepository.save(tutor);
-
-        } else if (dto.getUsertype() == Usertype.FOREIGN) {//유학생
-            ForeignTuteeAttribute tutee = ForeignTuteeAttribute.builder()
-                    .user(user)
-                    .country(dto.getCountry())
-                    .build();
-            foreignTuteeRepository.save(tutee);
-        }
-
-        return user.getId();
-    }
-
     // 2단계: 인증 메일 발송
     public boolean sendVerificationEmail(String email) {
         //새 인증 메일 발송
@@ -95,21 +45,67 @@ public class UserService {
     }
 
     //3단계: 인증코드 검증 및 가입 완료
-    public Long verifyAndCompleteSignUp(String email, int code) {
-        // 1) 이메일 기준으로 User 조회
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
-        if (user.getUsertype() == Usertype.NATIVE) {
-            boolean ok = univcertService.verifyCode(user.getEmail(), code);
-            if (!ok) {
-                throw new IllegalArgumentException(ErrorStatus.CERTIFICATION_CODE_MISMATCH.getMessage());
-            }
-            user.setIsEmailVerified(true);
-            userRepository.save(user);
+    // ─── 3단계: 인증 코드 검증 및 실제 사용자 저장 ───
+    public Long verifyAndCompleteSignUp(
+            String loginId,
+            String email,
+            String rawPassword,
+            String name,
+            LocalDate birthday,
+            String major,
+            Gender gender,
+            Usertype usertype,
+            String country,
+            Integer code
+    ) {
+        // 1) UnivCert 검증만 수행 (DB 조회 없이)
+        boolean ok = univcertService.verifyCode(email, code);
+        if (!ok) {
+            throw new IllegalArgumentException(
+                    ErrorStatus.CERTIFICATION_CODE_MISMATCH.getMessage()
+            );
         }
 
-        // FOREIGN 은 바로 통과
+        // 2) 검증 성공 시 “중복 체크” (DB에 아직 저장된 적이 없다고 가정)
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException(ErrorStatus.DUPLICATE_EMAIL.getMessage());
+        }
+        if (userRepository.existsByLoginId(loginId)) {
+            throw new IllegalArgumentException(ErrorStatus.LOGINID_DUPLICATE.getMessage());
+        }
+
+        // 3) User 엔티티 생성 & 저장
+        User user = User.builder()
+                .loginId(loginId)
+                .email(email)
+                .password(passwordEncoder.encode(rawPassword))
+                .name(name)
+                .birthday(birthday)
+                .major(major)
+                .gender(gender)
+                .usertype(usertype)
+                .isEmailVerified(true)   // 코드 검증이 끝났으므로 true
+                .isOn(true)
+                .build();
+        userRepository.save(user);
+
+        // 4) usertype에 따라 추가 속성 저장
+        if (usertype == Usertype.NATIVE) {
+            KoreanTutorAttribute tutor = KoreanTutorAttribute.builder()
+                    .user(user)
+                    .reputation(0L)
+                    .fixCount(0L)
+                    .build();
+            koreanTutorRepository.save(tutor);
+
+        } else if (usertype == Usertype.FOREIGN) {
+            ForeignTuteeAttribute tutee = ForeignTuteeAttribute.builder()
+                    .user(user)
+                    .country(country)
+                    .build();
+            foreignTuteeRepository.save(tutee);
+        }
+
         return user.getId();
     }
 
