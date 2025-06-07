@@ -25,5 +25,20 @@ public class Image extends BaseEntity {
     @Column(name = "is_posted")
     private Boolean isPosted;
 
+    // Stream 업로드는 관련 X
+    @Column(name = "s3_upload_id")
+    private String s3UploadId;
 
-}
+    // Stream 업로드는 관련 X
+    @Column(name = "is_s3_uploaded")
+    private Boolean isS3Uploaded;
+
+    public Image(String imageKey, String imageUrl, String s3UploadId, Boolean isPosted, Boolean isS3Uploaded) {
+        this.imageKey = imageKey;
+        this.imageUrl = imageUrl;
+        this.s3UploadId = s3UploadId;
+        this.isPosted = isPosted;
+        this.isS3Uploaded = isS3Uploaded;
+    }
+
+    public void updat
