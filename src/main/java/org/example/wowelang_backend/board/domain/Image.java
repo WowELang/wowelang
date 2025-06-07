@@ -41,4 +41,7 @@ public class Image extends BaseEntity {
         this.isS3Uploaded = isS3Uploaded;
     }
 
-    public void updat
+    public void updateIsS3Uploaded(boolean flag) {
+        this.isS3Uploaded = flag;
+    }
+}
