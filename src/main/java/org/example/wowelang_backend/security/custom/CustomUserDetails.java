@@ -6,8 +6,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+import lombok.Getter;
+
 public class CustomUserDetails implements UserDetails {
 
+    @Getter
     private final Long id;
     private final String username;
     private final String password;
@@ -21,10 +24,6 @@ public class CustomUserDetails implements UserDetails {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     @Override

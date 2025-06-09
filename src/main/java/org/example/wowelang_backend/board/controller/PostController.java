@@ -2,7 +2,9 @@ package org.example.wowelang_backend.board.controller;
 
 import org.example.wowelang_backend.board.dto.*;
 import org.example.wowelang_backend.board.service.PostService;
+import org.example.wowelang_backend.common.annotation.CurrentUser;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
+import org.example.wowelang_backend.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,10 +30,11 @@ public class PostController {
     }
 
     @PostMapping("")
-    public ApiResponse<Long> createPost(@RequestParam Long boardId,
-                                        @RequestBody PostCreateDTO postCreateDto) {
+    public ApiResponse<Long> createPost( @CurrentUser User user,
+                                         @RequestParam Long boardId,
+                                         @RequestBody PostCreateDTO postCreateDto) {
 
-        return ApiResponse.created(postService.createPost(boardId, postCreateDto));
+        return ApiResponse.created(postService.createPost(boardId, postCreateDto, user));
     }
 
     @GetMapping("/{postId}")
