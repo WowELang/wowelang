@@ -3,6 +3,7 @@ package org.example.wowelang_backend.common.config;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.security.jwt.JwtAuthenticationFilter;
 import org.example.wowelang_backend.security.jwt.JwtTokenProvider;
+import org.example.wowelang_backend.security.jwt.RefreshTokenRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -55,7 +57,7 @@ public class SecurityConfig {
                 //JWT 방식으로 들어오는 요청은 “폼 로그인”이 아니라 “헤더에 달린 토큰” 기반으로 인증을 해야 하므로,
                 //폼 로그인 필터가 동작하기 전에 JWT 필터가 먼저 돌면서 인증 여부를 결정하도록 순서를 조정
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider),
+                        new JwtAuthenticationFilter(jwtTokenProvider, refreshTokenRepository),
                         UsernamePasswordAuthenticationFilter.class
                 );
         return http.build();
