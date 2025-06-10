@@ -6,25 +6,23 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 import org.example.wowelang_backend.auth.dto.UserPrincipalDTO;
-import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
+
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
-import org.example.wowelang_backend.security.custom.CustomUserDetailsService;
+
 import org.example.wowelang_backend.user.domain.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Key;
-import java.time.Duration;
+
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
+
 
 @Component
 @RequiredArgsConstructor
@@ -36,7 +34,6 @@ public class JwtTokenProvider {
     // Access Token 유효기간(초단위)
     @Value("${jwt.token-validity-in-seconds}")
     private Long accesstokenValidityInSeconds;
-    @Value("${jwt.refresh-token-validity-in-seconds}")
 
     private final RefreshTokenRepository refreshTokenRepository;
 

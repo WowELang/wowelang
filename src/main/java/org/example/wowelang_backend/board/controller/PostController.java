@@ -12,6 +12,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RestController
 @RequestMapping("/post")
 public class PostController {
@@ -30,7 +32,7 @@ public class PostController {
     }
 
     @PostMapping("")
-    public ApiResponse<Long> createPost( @CurrentUser User user,
+    public ApiResponse<Long> createPost( @Parameter(hidden = true) @CurrentUser User user,
                                          @RequestParam Long boardId,
                                          @RequestBody PostCreateDTO postCreateDto) {
 

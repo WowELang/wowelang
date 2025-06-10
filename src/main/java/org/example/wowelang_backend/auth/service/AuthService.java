@@ -1,7 +1,5 @@
 package org.example.wowelang_backend.auth.service;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.auth.dto.LoginRequestDto;
@@ -18,9 +16,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Security;
 import java.util.List;
 
 @Service
@@ -77,8 +77,13 @@ public class AuthService {
 
         // 유저의 리프레시 토큰과 db의 리프레시 토큰 대조
         RefreshToken refreshTokenObj = refreshTokenRepository.findByRefreshToken(refreshToken)
-            .filter(refresh -> !refresh.isExpired() && !refresh.isRevoked())
-            .orElseThrow(() -> new ResponseStatusException(ErrorStatus.TOKEN_INVALID.getHttpStatus(), ErrorStatus.TOKEN_INVALID.getMessage()));
+            .orElseThrow(this::unauthorized);
+
+        // 2-1) 만료 or 이미 삭제된 토큰 ⇒ 로그아웃
+        if (refreshTokenObj.isExpired() || refreshTokenObj.isRevoked()) {
+            refreshTokenObj.revokeRefreshToken();          // 논리 삭제
+            throw unauthorized();
+        }
 
         // 액세스 토큰의 유저아이디와 리프레시 토큰이 참조하는 유저아이디가 같은 지 확인
         String accessTokenUserId = jwtTokenProvider.getUserId(expiredAccessToken);
@@ -109,5 +114,24 @@ public class AuthService {
         String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getLoginId(), roles);
 
         return new JwtDto(newAccessToken, newRefreshToken);
+    }
+
+    // 공통 401 반환
+    private ResponseStatusException unauthorized() {
+        return new ResponseStatusException(
+            ErrorStatus.TOKEN_INVALID.getHttpStatus(),
+            ErrorStatus.TOKEN_INVALID.getMessage());
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+
+        // DB에서 리프레시 토큰 찾아와서 논리삭제
+        refreshTokenRepository.findByRefreshToken(refreshToken).ifPresent(RefreshToken::revokeRefreshToken);
+
+        // TODO : 블랙리스트 방식은 고려사항 (급한건 아님)
+
+        // SecurityContext 비우기
+        SecurityContextHolder.clearContext();
     }
 }

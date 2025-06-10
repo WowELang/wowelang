@@ -28,10 +28,7 @@ public class InterestService {
 
     //최초 관심사 세팅
     //이미 init 되어 있으면 400 예외 발생
-    public void initInterest(Long userId, List<Long> interestIds) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+    public void initInterest(User user, List<Long> interestIds) {
         if (Boolean.TRUE.equals(user.getInterestInitialized())) {
             throw new IllegalStateException(ErrorStatus.INTERESTS_ALREADY_IVITIALIZED.getMessage());
         }
@@ -62,10 +59,7 @@ public class InterestService {
 
 
     //관심사 수정
-    public void updateInterests(Long userId, List<Long> newInterestIds) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+    public void updateInterests(User user, List<Long> newInterestIds) {
         if (!user.getInterestInitialized()) {
             throw new IllegalStateException(ErrorStatus.INTERESTS_NOT_IVITIALIZED.getMessage());
         }
@@ -77,7 +71,7 @@ public class InterestService {
         }
 
         // 2) 기존 관심사 전부 삭제
-        userInterestRepository.deleteByUserId(userId);
+        userInterestRepository.deleteByUserId(user.getId());
 
         // 3) 새 관심사 일괄 저장
         List<UserInterest> links = interests.stream()
