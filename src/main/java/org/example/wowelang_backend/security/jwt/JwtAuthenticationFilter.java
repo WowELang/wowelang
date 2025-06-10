@@ -1,5 +1,6 @@
 package org.example.wowelang_backend.security.jwt;
 
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
@@ -7,6 +8,7 @@ import org.example.wowelang_backend.user.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,7 +17,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -24,54 +29,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    // 필터에서는 액세스 토큰의 서명만 검증함 (DB 체크 X)
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        // 1) Authorization 헤더에서 "Bearer {token}" 추출
-        String accessHeader = checkBearer(request.getHeader("Authorization"));
 
-        if (accessHeader != null && jwtTokenProvider.validateAccessToken(accessHeader)) {
-            setAuth(jwtTokenProvider, accessHeader);
-        } else {
-            String refreshToken = extractRefresh(request);
-            if(refreshToken != null) {
-                reIssue(accessHeader, refreshToken, response);
-            }
+        String accessTokenWithBearer = request.getHeader("Authorization");
+
+        String accessToken = jwtTokenProvider.extractAccessToken(accessTokenWithBearer);
+
+        if (jwtTokenProvider.validateAccessToken(accessToken)) {
+            setAuth(jwtTokenProvider, accessToken);
         }
+
         // 4) 다음 필터 실행
         filterChain.doFilter(request, response);
     }
 
-    private void reIssue(String oldAccess, String refreshToken, HttpServletResponse response) {
-        RefreshToken refreshTokenObj = refreshTokenRepository.findByRefreshToken(refreshToken)
-            .filter(refresh -> !refresh.isExpired())
-            .orElseThrow(() -> new ResponseStatusException(ErrorStatus.TOKEN_INVALID.getHttpStatus(), ErrorStatus.TOKEN_INVALID.getMessage()));
-
-        User user = refreshTokenObj.getUser();
-
-        String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getLoginId(),
-                                                                    List.of("ROLE_" + user.getUsertype()));
-
-        response.setHeader("accessToken", newAccessToken);
-
-        setAuth(jwtTokenProvider, newAccessToken);
-    }
-
+    // 시큐리티 컨텍스트에 유저정보를 넣어줌
     private void setAuth(JwtTokenProvider jwtTokenProvider, String token) {
         Authentication authentication = jwtTokenProvider.getAuthentication(token);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    private String checkBearer(String header) {
-        return (header != null && header.startsWith("Bearer "))
-            ? header.substring(7) : null;
-    }
-
-    private String extractRefresh(HttpServletRequest request) {
-        return request.getHeader("refreshToken");
     }
 
     @Override
@@ -79,33 +60,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // 토큰 없이도 접근 가능한 엔드포인트
-        // 1) POST /user               (회원가입)
-        if ("/user".equals(path) && "POST".equals(method)) {
-            return true;
-        }
-        // 2) POST /user/check-login-id (아이디 중복 확인)
-        if ("/user/check-login-id".equals(path) && "POST".equals(method)) {
-            return true;
-        }
-        // 3) POST /user/email-verification (메일발송/초기화)
-        if (path.matches("^/user/email-verification$") && "POST".equals(method)) {
-            return true;
-        }
-        // 4) PATCH /user/{id}/complete (코드검증+가입완료)
-        if (path.matches("^/user/complete$") && "PATCH".equals(method)) {
-            return true;
-        }
-        // 5) POST /auth/login         (로그인)
-        if ("/auth/login".equals(path) && "POST".equals(method)) {
-            return true;
-        }
-        // 6) DELETE /user/email-verification (메일발송/초기화)
-        if (path.matches("^/user/email-verification$") && "DELETE".equals(method)) {
-            return true;
+        // 필터를 생략할 URL 패턴 정의
+        Map<String, Set<String>> whitelist = Map.of(
+            "OPTIONS", Set.of("/**"), // CORS Preflight 요청 허용
+            "POST", Set.of(
+                "/user",                       // 회원가입
+                "/user/email-verification",    // 이메일 인증 요청
+                "/user/check-login-id",        // 아이디 중복 체크
+                "/auth/login"                  // 로그인
+            ),
+            "PATCH", Set.of(
+                "/user/complete"               // 가입 완료
+            ),
+            "DELETE", Set.of(
+                "/user/email-verification"     // 이메일 인증 초기화
+            )
+        );
+
+        // Swagger 및 기타 인증 제외 경로
+        Set<String> excludedPaths = Set.of(
+            "/", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/env", "/hc", "/error"
+        );
+
+        // exclude 경로 매칭
+        for (String excluded : excludedPaths) {
+            if (PATH_MATCHER.match(excluded, path)) return true;
         }
 
-        // 그 외 모든 요청은 JWT 검사 대상
-        return false;
+        // HTTP 메서드별 화이트리스트 매칭
+        return whitelist.getOrDefault(method, Set.of())
+            .stream()
+            .anyMatch(pattern -> PATH_MATCHER.match(pattern, path));
     }
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 }

@@ -42,16 +42,25 @@ public class RefreshToken extends BaseEntity {
 	@Column(nullable = false, name = "expire_at")
 	private LocalDateTime expireAt;
 
+	@Column(name = "is_revoked")
+	private boolean isRevoked = false;
+
 	public static RefreshToken of(User user, String token, long ttl) {
 		return new RefreshToken(
 			null,
 			token,
 			user,
-			LocalDateTime.now().plusSeconds(ttl)
+			LocalDateTime.now().plusSeconds(ttl),
+			false
 		);
 	}
 
 	public boolean isExpired() {
 		return expireAt.isBefore(LocalDateTime.now());
+	}
+
+	// 리프레시 토큰 철회 (논리삭제) 메서드
+	public void revokeRefreshToken() {
+		this.isRevoked=true;
 	}
 }

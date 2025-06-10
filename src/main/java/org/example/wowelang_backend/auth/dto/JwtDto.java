@@ -1,14 +1,15 @@
 package org.example.wowelang_backend.auth.dto;
 
-import lombok.Data;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter
+@Builder
 @AllArgsConstructor
-public class LoginResponseDto {
+public class JwtDto {
     private String accessToken;
     private String refreshToken;
 }
