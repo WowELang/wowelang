@@ -29,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @Operation(summary = "AccessToken, RefreshToken 재발급 API", description = "만료된 AccessToken과 RefreshToken 투입 -> 새로운 AccessToken과 새로운 RefreshToken 생성해 전달 (RTR방식) \n"
-    + "리프레시 토큰이 만료되면 로그아웃", tags = "인증")
+    + "리프레시 토큰이 만료되면 로그아웃\n" + "Authorization에는 [Bearer accesstoken] 으로 들어가야함", tags = "인증")
     public ApiResponse<JwtDto> reIssueAccessToken(
         @RequestHeader("RefreshToken") String refreshToken,
         @RequestHeader("Authorization") String expiredAccessTokenHeader) {
