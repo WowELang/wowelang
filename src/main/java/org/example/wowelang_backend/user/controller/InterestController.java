@@ -1,9 +1,13 @@
 package org.example.wowelang_backend.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+
+import org.example.wowelang_backend.common.annotation.CurrentUser;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
+import org.example.wowelang_backend.user.domain.User;
 import org.example.wowelang_backend.user.dto.InterestDto;
 import org.example.wowelang_backend.user.dto.InterestReqDto;
 import org.example.wowelang_backend.user.service.InterestService;
@@ -31,11 +35,11 @@ public class InterestController {
     @PostMapping("/me")
     @Operation(description = "관심사 수정", summary = "관심사 수정")
     public ApiResponse<List<Long>> initMyInterests(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody InterestReqDto dto
             ) {
         List<Long> ids = dto.getInterestIds();
-        interestService.initInterest(me.getId(), ids);
+        interestService.initInterest(user, ids);
         // 생성된 리소스(최초 관심사 리스트)를 result로 담아서 201 반환
         return ApiResponse.created(ids);
     }
@@ -43,11 +47,11 @@ public class InterestController {
     // 관심사 수정
     @PutMapping("/me")
     public ApiResponse<List<Long>> updateMyInterests(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody InterestReqDto dto
     ) {
         List<Long> newIds = dto.getInterestIds();
-        interestService.updateInterests(me.getId(), newIds);
+        interestService.updateInterests(user, newIds);
         return ApiResponse.onSuccess(newIds);
     }
 }

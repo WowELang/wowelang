@@ -56,10 +56,10 @@ public class User {
     // 초기 관심사 설정 여부 플래그
     private Boolean interestInitialized = false;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true, fetch = FetchType.LAZY)
     private KoreanTutorAttribute koreanTutorAttribute;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true, fetch = FetchType.LAZY)
     private ForeignTuteeAttribute foreignTuteeAttribute;
 
     public void setInterestsInitialized(boolean interestsInitialized) {

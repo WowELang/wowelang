@@ -2,13 +2,17 @@ package org.example.wowelang_backend.board.controller;
 
 import org.example.wowelang_backend.board.dto.*;
 import org.example.wowelang_backend.board.service.PostService;
+import org.example.wowelang_backend.common.annotation.CurrentUser;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
+import org.example.wowelang_backend.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.Parameter;
 
 @RestController
 @RequestMapping("/post")
@@ -28,10 +32,11 @@ public class PostController {
     }
 
     @PostMapping("")
-    public ApiResponse<Long> createPost(@RequestParam Long boardId,
-                                        @RequestBody PostCreateDTO postCreateDto) {
+    public ApiResponse<Long> createPost( @Parameter(hidden = true) @CurrentUser User user,
+                                         @RequestParam Long boardId,
+                                         @RequestBody PostCreateDTO postCreateDto) {
 
-        return ApiResponse.created(postService.createPost(boardId, postCreateDto));
+        return ApiResponse.created(postService.createPost(boardId, postCreateDto, user));
     }
 
     @GetMapping("/{postId}")

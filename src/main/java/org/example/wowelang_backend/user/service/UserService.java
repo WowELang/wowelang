@@ -6,7 +6,6 @@ import org.example.wowelang_backend.user.domain.*;
 import org.example.wowelang_backend.user.dto.CharacterInfoDto;
 import org.example.wowelang_backend.user.dto.InterestDto;
 import org.example.wowelang_backend.user.dto.UserProfileDto;
-import org.example.wowelang_backend.user.dto.UserSignupReqDto;
 import org.example.wowelang_backend.user.repository.ForeignTuteeRepository;
 import org.example.wowelang_backend.user.repository.KoreanTutorRepository;
 import org.example.wowelang_backend.user.repository.UserInterestRepository;
@@ -131,10 +130,7 @@ public class UserService {
     }
 
     // 최초 닉네임 설정
-    public String setNickname(Long userId, String nickname) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+    public void setNickname(User user, String nickname) {
         //최초 설정 여부 검사
         if (user.isNicknameInitialized()) {
             throw new IllegalStateException(ErrorStatus.INITIALIZED_NICKNAME.getMessage());
@@ -143,13 +139,10 @@ public class UserService {
         user.initNickname(nickname);
         userRepository.save(user);
 
-        return user.getNickname();
     }
 
     // 최초 캐릭터 설정
-    public CharacterInfoDto setCharacter(Long userId, int colorId, int maskId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+    public void setCharacter(User user, int colorId, int maskId) {
 
         //최초 설정 여부 검사
         if (user.isCharacterInitialized()) {
@@ -160,17 +153,15 @@ public class UserService {
         userRepository.save(user);
 
         // 컨트롤러로 보낼 DTO 생성
-        return new CharacterInfoDto(user.getColorId(), user.getMaskId());
+        new CharacterInfoDto(user.getColorId(), user.getMaskId());
     }
 
     // 내 프로필 조회 (PK, 닉네임, 캐릭터, 관심사)
     @Transactional(readOnly = true)
-    public UserProfileDto getMyProfile(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+    public UserProfileDto getMyProfile(User user) {
 
         // 관심사 조회
-        List<InterestDto> interests = userInterestRepository.findAllByUserId(userId).stream()
+        List<InterestDto> interests = userInterestRepository.findAllByUserId(user.getId()).stream()
                 .map(ui -> new InterestDto(ui.getInterest().getId(), ui.getInterest().getName()))
                 .toList();
         // 캐릭터 정보
@@ -200,9 +191,7 @@ public class UserService {
     }
 
     // 닉네임 수정
-    public String updateNickname(Long userId, String newNickname) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+    public String updateNickname(User user, String newNickname) {
 
         // 단순 setter 로 덮어쓰기
         user.setNickname(newNickname);
@@ -216,10 +205,7 @@ public class UserService {
     }
 
     // 캐릭터 수정 (언제든)
-    public CharacterInfoDto updateCharacter(Long userId, int colorId, int maskId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+    public CharacterInfoDto updateCharacter(User user, int colorId, int maskId) {
         // 단순 setter 로 덮어쓰기
         user.setColorId(colorId);
         user.setMaskId(maskId);
@@ -232,10 +218,7 @@ public class UserService {
     }
 
     //비밀번호 변경
-    public void changePassword(Long userId, String currentPassword, String newPassword) {
-        User user = userRepository.findByIdAndIsDeleteFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+    public void changePassword(User user, String currentPassword, String newPassword) {
         // 1) 현재 비밀번호 검증
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new IllegalArgumentException(ErrorStatus.INVALID_PASSWORD.getMessage());
@@ -248,11 +231,7 @@ public class UserService {
     }
 
     //회원탈퇴
-    public void deleteAccount(Long userId) {
-        // 1) 실제 DB에서 삭제하지 않고, isDeleted=true 로 마킹
-        User user = userRepository.findByIdAndIsDeleteFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.INVALID_USER.getMessage()));
-
+    public void deleteAccount(User user) {
         // (선택) 관심사, ForeignTutee, KoreanTutor 등 연관 객체도 논리 삭제를 원하면 각각의 엔티티에 isDeleted 필드를 추가하고 여기서 또 마킹하세요.
         // 만약 완전 삭제가 필요하다면 userInterestRepository.deleteByUserId(userId) 등을 그대로 호출해도 됩니다.
         // 예시: userInterestRepository.deleteByUserId(userId);

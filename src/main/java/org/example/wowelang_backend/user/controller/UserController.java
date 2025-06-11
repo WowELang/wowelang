@@ -1,10 +1,14 @@
 package org.example.wowelang_backend.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.example.wowelang_backend.common.annotation.CurrentUser;
 import org.example.wowelang_backend.common.apiPayLoad.ApiResponse;
 import org.example.wowelang_backend.security.custom.CustomUserDetails;
+import org.example.wowelang_backend.user.domain.User;
 import org.example.wowelang_backend.user.dto.*;
 import org.example.wowelang_backend.user.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -77,11 +81,11 @@ public class UserController {
     @PostMapping("/me/nickname")
     @Operation(description = "최초 로그인 시 닉네임 설정", summary = "닉네임 설정")
     public ApiResponse<Void> initNickname(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody NicknameReqDto dto
     ) {
         String nickname = dto.getNickname();
-        userService.setNickname(me.getId(), nickname);
+        userService.setNickname(user, nickname);
         return ApiResponse.created(null);
     }
 
@@ -89,31 +93,30 @@ public class UserController {
     @PostMapping("/me/character")
     @Operation(description = "최초 로그인 시 아바타 설정", summary = "아바타 설정")
     public ApiResponse<Void> initCharacter(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody CharacterReqDto dto
     ) {
-        userService.setCharacter(me.getId(), dto.getColorId(), dto.getMaskId());
+        userService.setCharacter(user, dto.getColorId(), dto.getMaskId());
         return ApiResponse.created(null);
     }
 
     // 내 프로필 조회
     @GetMapping("/me/profile")
     @Operation(description = "내 정보 조회", summary = "내 정보 조회")
-
     public UserProfileDto getProfile(
-            @AuthenticationPrincipal CustomUserDetails me
+        @Parameter(hidden = true) @CurrentUser User user
     ) {
-        return userService.getMyProfile(me.getId());
+        return userService.getMyProfile(user);
     }
 
     // 닉네임 수정
     @PutMapping("/me/nickname")
     @Operation(description = "닉네임 수정", summary = "닉네임 수정")
     public ApiResponse<String> updateNickname(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody NicknameReqDto dto
     ) {
-        String saved = userService.updateNickname(me.getId(), dto.getNickname());
+        String saved = userService.updateNickname(user, dto.getNickname());
         return ApiResponse.onSuccess(saved);
     }
 
@@ -121,11 +124,11 @@ public class UserController {
     @PutMapping("/me/character")
     @Operation(description = "아바타 수정", summary = "아바타 수정")
     public ApiResponse<CharacterInfoDto> updateCharacter(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody CharacterReqDto dto
     ) {
         CharacterInfoDto responseDto = userService.updateCharacter(
-                me.getId(),
+                user,
                 dto.getColorId(),
                 dto.getMaskId()
         );
@@ -136,11 +139,11 @@ public class UserController {
     @PutMapping("/me/password")
     @Operation(description = "비밀번호 변경", summary = "비밀번호 변경")
     public ApiResponse<Void> changePassword(
-            @AuthenticationPrincipal CustomUserDetails me,
+        @Parameter(hidden = true) @CurrentUser User user,
             @RequestBody ChangePasswordReqDto req
     ) {
         userService.changePassword(
-                me.getId(),
+                user,
                 req.getCurrentPassword(),
                 req.getNewPassword()
         );
@@ -151,9 +154,9 @@ public class UserController {
     @DeleteMapping("/me")
     @Operation(description = "회원탈퇴", summary = "탈퇴")
     public ApiResponse<Object> deleteAccount(
-            @AuthenticationPrincipal CustomUserDetails me
+        @Parameter(hidden = true) @CurrentUser User user
     ) {
-        userService.deleteAccount(me.getId());
+        userService.deleteAccount(user);
         return ApiResponse.onSuccess(null);
     }
 
