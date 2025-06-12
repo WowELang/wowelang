@@ -17,7 +17,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // @return ApiResponse에 래핑된 JWT 토큰
+    // @return ApiResponse에 래핑된  JWT 토큰
     @Operation(summary = "로그인 API", description = "로그인 시 리프레시 토큰과 액세스 토큰 반환", tags = "인증")
     @PostMapping("/login")
     public ApiResponse<JwtDto> login(@RequestBody LoginRequestDto requestDto) {
