@@ -52,6 +52,8 @@ server:
 serverName: green_server
 
 ---
+server:
+  forward-headers-strategy: framework
 
 spring:
   config:

@@ -45,14 +45,10 @@ public class PostService {
     }
 
     @Transactional
-    public Long createPost(Long boardId, PostCreateDTO postCreateDto) {
+    public Long createPost(Long boardId, PostCreateDTO postCreateDto, User user) {
 
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new IllegalArgumentException(BOARD_NOT_FOUND.getMessage()));
-
-        // TODO: 인증 로직과 합친 후 변경 예정
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new IllegalArgumentException(("등록되지 않은 유저입니다.")));
 
         Post post = Post.createPost(postCreateDto, user, board);
 

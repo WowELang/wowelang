@@ -1,4 +1,4 @@
-package org.example.wowelang_backend.board.dto;
+package org.example.wowelang_backend.board.dto.image;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

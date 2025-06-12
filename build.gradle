@@ -48,7 +48,7 @@ dependencies {
 
     // aws S3 의존성
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.721'
     // 파일 압축 의존성
     implementation 'net.coobird:thumbnailator:0.4.19'
 
