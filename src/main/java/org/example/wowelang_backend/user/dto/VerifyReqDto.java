@@ -9,7 +9,6 @@ import org.example.wowelang_backend.user.domain.Usertype;
 
 import java.time.LocalDate;
 
-
 @Getter
 @Setter
 @NoArgsConstructor

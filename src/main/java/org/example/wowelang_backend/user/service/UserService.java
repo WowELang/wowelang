@@ -1,9 +1,11 @@
 package org.example.wowelang_backend.user.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.wowelang_backend.common.apiPayLoad.status.ErrorStatus;
 import org.example.wowelang_backend.user.domain.*;
 import org.example.wowelang_backend.user.dto.CharacterInfoDto;
+import org.example.wowelang_backend.user.dto.FriendProfileDto;
 import org.example.wowelang_backend.user.dto.InterestDto;
 import org.example.wowelang_backend.user.dto.UserProfileDto;
 import org.example.wowelang_backend.user.repository.ForeignTuteeRepository;
@@ -237,5 +239,41 @@ public class UserService {
         // 예시: userInterestRepository.deleteByUserId(userId);
 
         user.delete();  // 엔티티에 정의한 delete() 호출 → isDeleted=true
+    }
+
+    // 친구 요청 수락 후 보여줄 프로필 조회
+    public FriendProfileDto getFriendProfile(Long friendUserId) {
+        // 1) User 엔티티 조회
+        User user = userRepository.findById(friendUserId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        // 2) 관심사 조회
+        List<InterestDto> interests = userInterestRepository
+                .findAllByUserId(user.getId()).stream()
+                .map(ui -> new InterestDto(ui.getInterest().getId(), ui.getInterest().getName()))
+                .toList();
+
+        // 3) 캐릭터 정보
+        CharacterInfoDto character = new CharacterInfoDto(
+                user.getColorId(),
+                user.getMaskId()
+        );
+
+        // 4) country/Major 결정
+        String countryOrMajor;
+        if (user.getUsertype() == Usertype.FOREIGN) {
+            ForeignTuteeAttribute attr = user.getForeignTuteeAttribute();
+            countryOrMajor = (attr != null ? attr.getCountry() : null);
+        } else {
+            countryOrMajor = user.getMajor();
+        }
+
+        // 5) DTO로 반환
+        return new FriendProfileDto(
+                character,            // CharacterInfoDto
+                user.getNickname(),   // String
+                interests,            // List<InterestDto>
+                countryOrMajor        // String
+        );
     }
 }

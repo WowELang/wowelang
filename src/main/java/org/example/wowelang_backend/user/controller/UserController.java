@@ -160,4 +160,11 @@ public class UserController {
         return ApiResponse.onSuccess(null);
     }
 
+    // 친구 요청 수락
+    @GetMapping("/me/{userId}/profile")
+    public ApiResponse<FriendProfileDto> getFriendProfile(@PathVariable Long userId) {
+        FriendProfileDto dto = userService.getFriendProfile(userId);
+        return ApiResponse.onSuccess(dto);
+    }
+
 }

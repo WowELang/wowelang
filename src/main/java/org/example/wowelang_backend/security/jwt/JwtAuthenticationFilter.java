@@ -55,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
-
         // 필터를 생략할 URL 패턴 정의
         Map<String, Set<String>> whitelist = Map.of(
             "OPTIONS", Set.of("/**"), // CORS Preflight 요청 허용
